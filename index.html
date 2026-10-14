@@ -53,7 +53,7 @@ button{font-family:inherit}
 .scroll{flex:1;min-height:0;overflow-y:auto}
 .split{height:100%}
 .sidenav{display:none}
-.bottomnav{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0}
+.bottomnav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0}
 .bn-btn{background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:11px;font-weight:600}
 .bn-btn.active{color:var(--brand-text)}
 body.ledger-open .bottomnav{display:none}
@@ -199,6 +199,20 @@ textarea.form-control{resize:vertical;min-height:72px}
 .stmt-sum span:nth-child(even){text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
 
 
+
+/* P&L */
+.pnl-wrap{max-width:900px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px;padding-bottom:24px}
+.result{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);padding:16px;display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.result .l{font-size:13px;color:var(--muted)} .result .v{font-size:28px;font-weight:700;line-height:1.2}
+.pl-row{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 16px;border-top:1px solid var(--line);font-size:14px}
+.pl-row .a{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pl-row input{max-width:150px;text-align:right}
+.pl-row.sub{color:var(--muted);font-size:13px;padding-left:28px}
+.pl-row.total{font-weight:700;background:var(--bg)}
+.pl-note{font-size:12px;color:var(--muted);padding:10px 16px 14px;border-top:1px solid var(--line)}
+.reg-row{display:flex;justify-content:flex-end;padding:0 16px 10px}
+.profit-row{width:100%;border:0;color:var(--fg);text-align:left;background:var(--surface)}
+.profit-row:hover{background:var(--brand-soft)}
 /* Form pages */
 .fpage{position:absolute;inset:0;z-index:30;background:var(--bg)}
 .fp-form{display:flex;flex-direction:column;height:100%}
@@ -265,6 +279,8 @@ body.form-open .bottomnav{display:none}
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h12M8 8h7"/></svg>Khata</button>
     <button class="nav-btn" data-go="bills">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Sales &amp; purchases</button>
+    <button class="nav-btn" data-go="pnl">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Profit &amp; loss</button>
     <div class="flex-grow-1"></div>
     <button class="nav-btn" data-settings>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
@@ -314,6 +330,7 @@ body.form-open .bottomnav{display:none}
               <div class="mstat"><div class="l">GST paid on purchases</div><div class="v" id="mGstIn">₹0</div></div>
             </div>
             <div class="gst-net"><span id="gstNetLabel">Net GST payable</span><strong id="gstNet">₹0</strong></div>
+            <button class="gst-net profit-row" data-go="pnl"><span id="mProfitL">Profit this month</span><strong id="mProfit">₹0</strong></button>
           </div>
 
           <div class="dash-lists">
@@ -412,6 +429,7 @@ body.form-open .bottomnav{display:none}
       </header>
       <div class="scroll">
         <div class="bills-wrap">
+          <div class="px-3 pt-3"><label for="billPartyFilter" class="lbl">Party</label><select id="billPartyFilter" class="form-select"></select></div>
           <div class="month-nav">
             <button id="mPrev" aria-label="Previous month"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
             <strong id="mLabel">October 2026</strong>
@@ -422,6 +440,7 @@ body.form-open .bottomnav{display:none}
             <div><div class="l">Total</div><div class="v" id="bsTotal">₹0</div></div>
             <div><div class="l">GST</div><div class="v" id="bsGst">₹0</div></div>
           </div>
+          <div class="reg-row"><button class="chip-btn" id="regPdfBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg><span id="regPdfLabel">Download register (PDF)</span></button></div>
           <div class="list" id="billList"></div>
         </div>
       </div>
@@ -429,6 +448,63 @@ body.form-open .bottomnav{display:none}
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
         <span id="billFabLabel">NEW SALE</span>
       </button>
+    </section>
+
+    <!-- PROFIT & LOSS -->
+    <section class="page col" data-page="pnl" hidden>
+      <header class="appbar d-flex align-items-center gap-2 px-3 py-3">
+        <div class="flex-grow-1 min-w-0"><div class="biz-name">Profit &amp; loss</div><div class="biz-sub">From your bills and expenses</div></div>
+      </header>
+      <div class="scroll">
+        <div class="pnl-wrap">
+          <div class="sec p-3 d-flex flex-column gap-2">
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-sm-5"><label for="pnlPeriod" class="lbl">Period</label>
+                <select id="pnlPeriod" class="form-select">
+                  <option value="month" selected>This month</option>
+                  <option value="last">Last month</option>
+                  <option value="fy">This financial year</option>
+                  <option value="lastfy">Last financial year</option>
+                  <option value="custom">Custom dates</option>
+                </select></div>
+              <div class="col-6 col-sm-3" id="pnlFromWrap" hidden><label for="pnlFrom" class="lbl">From</label><input id="pnlFrom" type="date" class="form-control"></div>
+              <div class="col-6 col-sm-3" id="pnlToWrap" hidden><label for="pnlTo" class="lbl">To</label><input id="pnlTo" type="date" class="form-control"></div>
+            </div>
+            <div class="small text-body-secondary" id="pnlRangeLabel"></div>
+          </div>
+
+          <div class="result">
+            <div><div class="l" id="pnlResultL">Net profit</div><div class="v num" id="pnlResult">₹0</div></div>
+            <div class="text-end small text-body-secondary" id="pnlMargin"></div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><span>Trading</span></div>
+            <div class="pl-row"><span>Sales <span class="text-body-secondary small" id="pnlSalesN"></span></span><span class="a" id="pnlSales">₹0</span></div>
+            <div class="pl-row"><span>Less: Purchases <span class="text-body-secondary small" id="pnlPurchN"></span></span><span class="a" id="pnlPurch">₹0</span></div>
+            <div class="pl-row"><label for="pnlOpen" class="mb-0">Less: Opening stock</label><input id="pnlOpen" class="form-control form-control-sm num" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></div>
+            <div class="pl-row"><label for="pnlClose" class="mb-0">Add: Closing stock</label><input id="pnlClose" class="form-control form-control-sm num" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></div>
+            <div class="pl-row total"><span id="pnlGrossL">Gross profit</span><span class="a" id="pnlGross">₹0</span></div>
+            <div class="pl-note">Amounts are before GST. GST you collect or pay goes to the government, so it is neither income nor cost. Enter stock values at cost so that bulk buying doesn't show up as a loss.</div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><span>Expenses</span><button id="addExpBtn2">+ Add expense</button></div>
+            <div id="pnlExpCats"></div>
+            <div class="pl-row total"><span>Total expenses</span><span class="a" id="pnlExpTotal">₹0</span></div>
+            <div class="pl-row total"><span id="pnlNetL">Net profit</span><span class="a" id="pnlNet">₹0</span></div>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><span>Expense entries</span><span class="small text-body-secondary fw-normal" id="pnlExpCount"></span></div>
+            <div id="pnlExpList"></div>
+          </div>
+        </div>
+      </div>
+      <footer class="actionbar">
+        <button class="btn btn-outline-primary fw-semibold" id="addExpBtn">+ Add expense</button>
+        <button class="btn btn-primary fw-semibold" id="pnlPdfBtn">Download PDF</button>
+      </footer>
     </section>
     <!-- ===== Form pages (full screen on phone, fill the content area on desktop) ===== -->
 
@@ -512,6 +588,7 @@ body.form-open .bottomnav{display:none}
         </div></div>
         <footer class="fp-foot"><div class="fp-foot-inner">
           <button type="button" class="btn btn-outline-danger" id="deleteBillBtn" hidden>Delete</button>
+          <button type="button" class="btn btn-outline-secondary" id="billPdfBtn" hidden>PDF</button>
           <button type="submit" class="btn btn-primary">Save bill</button>
         </div></footer>
       </form>
@@ -569,11 +646,14 @@ body.form-open .bottomnav{display:none}
               <div class="col-6"><label for="stmtTo" class="lbl">To</label><input id="stmtTo" type="date" class="form-control"></div>
             </div>
           </div>
-          <div class="fcard"><span class="fcard-title">Summary</span><div class="stmt-sum" id="stmtSum"></div></div>
+          <div class="fcard"><span class="fcard-title">Account statement</span><div class="stmt-sum" id="stmtSum"></div>
+            <div class="small text-body-secondary">Every khata entry with running balance. Download it with the buttons at the bottom.</div></div>
+          <div class="fcard"><span class="fcard-title" id="pbTitle">Sales bills</span><div class="stmt-sum" id="pbSum"></div>
+            <button type="button" class="btn btn-outline-primary" id="pbPdfBtn">Download bills PDF</button></div>
         </div></div>
         <footer class="fp-foot"><div class="fp-foot-inner fp-two">
-          <button type="button" class="btn btn-outline-success" id="xlsBtn">Excel (.xlsx)</button>
-          <button type="button" class="btn btn-danger" id="pdfBtn">PDF</button>
+          <button type="button" class="btn btn-outline-success" id="xlsBtn">Statement Excel</button>
+          <button type="button" class="btn btn-danger" id="pdfBtn">Statement PDF</button>
         </div></footer>
       </div>
     </section>
@@ -604,6 +684,38 @@ body.form-open .bottomnav{display:none}
         </div></div>
         <footer class="fp-foot"><div class="fp-foot-inner">
           <button type="submit" class="btn btn-primary">Save</button>
+        </div></footer>
+      </form>
+    </section>
+
+    <!-- Expense page -->
+    <section class="fpage" id="expModal" hidden>
+      <form class="fp-form" id="expForm" novalidate>
+        <header class="appbar fp-bar">
+          <button type="button" class="icon-btn" data-close aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <h1 id="expTitle">Add expense</h1>
+        </header>
+        <div class="fp-body"><div class="fp-inner">
+          <div class="fcard">
+            <div><label for="expCat" class="lbl">Category</label><select id="expCat" class="form-select"></select></div>
+            <div><label for="expAmount" class="lbl">Amount</label>
+              <div class="amount-wrap"><span>₹</span><input id="expAmount" data-autofocus class="form-control form-control-lg" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></div>
+              <div class="invalid-feedback d-block" id="expAmountError" hidden>Enter an amount greater than 0.</div></div>
+            <div><span class="lbl">Paid by</span>
+              <div class="btn-group seg w-100" role="group">
+                <input type="radio" class="btn-check" name="expMode" id="expCash" value="Cash"><label class="btn btn-outline-primary" for="expCash">Cash</label>
+                <input type="radio" class="btn-check" name="expMode" id="expUpi" value="UPI"><label class="btn btn-outline-primary" for="expUpi">UPI</label>
+                <input type="radio" class="btn-check" name="expMode" id="expBank" value="Bank"><label class="btn btn-outline-primary" for="expBank">Bank</label>
+              </div></div>
+          </div>
+          <div class="fcard">
+            <div><label for="expDate" class="lbl">Date</label><input id="expDate" class="form-control" type="date"></div>
+            <div><label for="expNote" class="lbl">Details (optional)</label><textarea id="expNote" class="form-control" rows="3" maxlength="500" placeholder="e.g. October shop rent"></textarea></div>
+          </div>
+        </div></div>
+        <footer class="fp-foot"><div class="fp-foot-inner">
+          <button type="button" class="btn btn-outline-danger" id="deleteExpBtn" hidden>Delete</button>
+          <button type="submit" class="btn btn-primary">Save expense</button>
         </div></footer>
       </form>
     </section>
@@ -646,6 +758,7 @@ body.form-open .bottomnav{display:none}
     <button class="bn-btn" data-go="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>Home</button>
     <button class="bn-btn" data-go="khata"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h12M8 8h7"/></svg>Khata</button>
     <button class="bn-btn" data-go="bills"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Bills</button>
+    <button class="bn-btn" data-go="pnl"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>P&amp;L</button>
   </nav>
 </div>
 
@@ -682,7 +795,7 @@ body.form-open .bottomnav{display:none}
   new MutationObserver(syncTheme).observe(root, {attributes:true, attributeFilter:['data-theme']});
 
   /* ================= helpers ================= */
-  const KEY = 'khata-demo-v2';
+  const KEY = 'khata-demo-v3';
   const $ = s => document.querySelector(s);
   const $$ = s => document.querySelectorAll(s);
   const inr = new Intl.NumberFormat('en-IN', {maximumFractionDigits:2});
@@ -710,7 +823,7 @@ body.form-open .bottomnav{display:none}
   function seed(){
     const s = {v:2, biz:{name:'Sreekrishna Stores', place:'Edappally, Kochi', gstin:'32ABCPK1234F1Z5'},
       gstRates:[0,3,5,18,40], tab:'customer', billTab:'all', seq:{sale:0, purchase:0},
-      parties:[], entries:[], bills:[], transfers:[]};
+      parties:[], entries:[], bills:[], transfers:[], expenses:[], stock:{}};
     const P = (type, name, phone, gstin, days) => { const p = {id:uid(), type, name, phone, gstin, created:at(days,9,0)}; s.parties.push(p); return p.id; };
     const E = (pid, kind, amount, note, days, h=11, m=15) => s.entries.push({id:uid(), partyId:pid, kind, amount, note, date:at(days,h,m)});
     const B = (kind, pid, days, items, paidNow=0, note='') => {
@@ -745,12 +858,21 @@ body.form-open .bottomnav{display:none}
     B('sale', anjali, 1, [['Maida 50 kg bag',2,1650,5],['Sugar 50 kg bag',1,2300,5]], 0);
     B('sale', fathima, 1, [['Toor dal 10 kg',2,1420,5],['Soft drinks crate',1,720,40]], 0, 'Delivered by van');
     E(joseph,'gave',260,'Milk & bread',0,8,15);
+    const X = (category, amount, mode, note, days) => s.expenses.push({id:uid(), category, amount, mode, note, date:at(days,10,0)});
+    X('Rent', 6000, 'Bank', 'Shop rent', 40); X('Salary & wages', 4000, 'Cash', 'Helper – Manoj (part)', 37);
+    X('Electricity', 1080, 'UPI', 'KSEB bill', 30); X('Rent', 6000, 'Bank', 'Shop rent', 12);
+    X('Salary & wages', 4000, 'Cash', 'Helper – Manoj (part)', 7); X('Electricity', 1150, 'UPI', 'KSEB bill', 5);
+    X('Transport', 400, 'Cash', 'Auto hire for delivery', 2);
     return s;
   }
   function load(){ try{ const s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; }catch(e){ return null; } }
   function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
 
   let state = load() || seed();
+  state.expenses = state.expenses || []; state.stock = state.stock || {};
+  const EXP_CATS = ['Rent','Salary & wages','Electricity','Transport','Shop expenses','Repairs & maintenance','Telephone & internet','Other'];
+  let expEditId = null;
+  let billParty = '';           // bills page party filter
   let page = 'home', openId = null, query = '', pendingConfirm = null;
   let monthOffset = 0;          // bills page: 0 = this month
   let editing = null;           // entry modal
@@ -886,6 +1008,7 @@ body.form-open .bottomnav{display:none}
     if (page === 'home') renderDash();
     if (page === 'khata'){ renderList(); if (openId) renderParty(); }
     if (page === 'bills') renderBills();
+    if (page === 'pnl') renderPnl();
   }
 
   function renderBrand(){
@@ -922,6 +1045,9 @@ body.form-open .bottomnav{display:none}
     const net = r2(gOut - gIn);
     $('#gstNetLabel').textContent = net >= 0 ? 'Net GST payable (collected − paid)' : 'GST credit to carry forward';
     $('#gstNet').textContent = money(net);
+    const pl = pnlData(pnlRange('month'));
+    $('#mProfitL').textContent = pl.net >= 0 ? 'Profit this month (see P&L)' : 'Loss this month (see P&L)';
+    $('#mProfit').textContent = money(pl.net); $('#mProfit').className = pl.net >= 0 ? 'give' : 'get';
 
     dues.sort((a,b) => b[1] - a[1]);
     $('#dueList').innerHTML = dues.length ? dues.slice(0,5).map(([p,b]) => `
@@ -1032,7 +1158,7 @@ body.form-open .bottomnav{display:none}
     $('#billTitle').textContent = b ? (b.kind === 'sale' ? 'Sale ' : 'Purchase ') + b.no : 'New ' + kind;
     $('#billNo').value = billDraft.no; $('#billDate').value = ymd(new Date(billDraft.date));
     $('#billPaid').value = billDraft.paidNow || ''; $('#billNote').value = billDraft.note || '';
-    $('#deleteBillBtn').hidden = !b;
+    $('#deleteBillBtn').hidden = !b; $('#billPdfBtn').hidden = !b;
     $('#itemsError').hidden = true; $('#paidError').hidden = true; $('#billParty').classList.remove('is-invalid');
     setBillKind(billDraft.kind, true);
     renderItems(); updateTotals();
@@ -1141,6 +1267,59 @@ body.form-open .bottomnav{display:none}
       <span>Total ${labels(p.type).gaveS.toLowerCase()} (Dr)</span><span>${money(d.dr)}</span>
       <span>Total ${labels(p.type).gotS.toLowerCase()} (Cr)</span><span>${money(d.cr)}</span>
       <span>Closing balance</span><span class="${i.cls}">${money(d.closing)} ${drcr(d.closing)}</span>`;
+    const pb = partyBills(p.id), noun = p.type === 'supplier' ? 'Purchase' : 'Sales';
+    $('#pbTitle').textContent = noun + ' bills';
+    $('#pbSum').innerHTML = `<span>Bills in period</span><span>${pb.list.length}</span>
+      <span>Taxable value</span><span>${money(pb.t)}</span><span>GST</span><span>${money(pb.g)}</span>
+      <span>Bill total</span><span>${money(pb.tot)}</span><span>${p.type === 'supplier' ? 'Paid' : 'Received'} on bills</span><span>${money(pb.paid)}</span>`;
+    $('#pbPdfBtn').disabled = !pb.list.length;
+    $('#pbPdfBtn').textContent = pb.list.length ? 'Download ' + noun.toLowerCase() + ' bills PDF' : 'No bills in this period';
+  }
+  // bills of one party inside the statement period
+  function partyBills(pid){
+    const {s: st, eEnd} = stmtRange();
+    const list = state.bills.filter(b => b.partyId === pid && (!st || new Date(b.date) >= st) && (!eEnd || new Date(b.date) < eEnd))
+      .sort((a,b) => a.date.localeCompare(b.date));
+    let t = 0, g = 0, tot = 0, paid = 0; const by = {};
+    list.forEach(b => { const c = billCalc(b); t = r2(t + c.taxable); g = r2(g + c.gst); tot = r2(tot + c.total); paid = r2(paid + (b.paidNow||0));
+      Object.keys(c.by).forEach(r => { by[r] = by[r] || {t:0, g:0}; by[r].t = r2(by[r].t + c.by[r].t); by[r].g = r2(by[r].g + c.by[r].g); }); });
+    return {list, t, g, tot, paid, by};
+  }
+  function partyBillsPdf(){
+    const doc = newPdf(); if (!doc) return;
+    const p = partyById(openId), pb = partyBills(p.id), {label} = stmtRange();
+    if (!pb.list.length) return toast('No bills for ' + p.name + ' in this period.');
+    const sup = p.type === 'supplier', title = sup ? 'PURCHASE REPORT' : 'SALES REPORT';
+    let y = pdfHeader(doc, title, [label, pb.list.length + ' bills']);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(120); doc.text(sup ? 'SUPPLIER' : 'CUSTOMER', 40, y + 18);
+    doc.setTextColor(20); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text(p.name, 40, y + 32);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90);
+    doc.text([p.phone ? 'Mobile: ' + p.phone : '', p.gstin ? 'GSTIN: ' + p.gstin : 'GSTIN: Unregistered'].filter(Boolean), 40, y + 46);
+    doc.setTextColor(20);
+    const body = [];
+    pb.list.forEach(b => { const c = billCalc(b), due = r2(c.total - (b.paidNow||0));
+      body.push([{content:dmy(new Date(b.date)) + '\n' + b.no, styles:{fontStyle:'bold'}},
+        b.items.map(it => it.name + '  (' + inr.format(it.qty) + ' x ' + inr2.format(it.rate) + ', GST ' + it.gst + '%)').join('\n') + (b.note ? '\nNote: ' + b.note : ''),
+        inr2.format(c.taxable), inr2.format(c.gst), inr2.format(c.total), due > 0 ? inr2.format(due) : 'Paid']); });
+    const due = r2(pb.tot - pb.paid);
+    doc.autoTable({...TBL, startY: y + 70, head:[['Date / Bill','Items','Taxable','GST','Total','Due']], body,
+      foot:[['', 'Total', inr2.format(pb.t), inr2.format(pb.g), inr2.format(pb.tot), inr2.format(due)]],
+      styles:{...TBL.styles, fontSize:8}, columnStyles:{0:{cellWidth:66}, 2:{halign:'right', cellWidth:62}, 3:{halign:'right', cellWidth:52}, 4:{halign:'right', cellWidth:64}, 5:{halign:'right', cellWidth:58}}});
+    y = doc.lastAutoTable.finalY + 18;
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text('GST summary', 40, y);
+    const rates = Object.keys(pb.by).map(Number).sort((a,b) => a-b).filter(r => pb.by[r].t > 0);
+    doc.autoTable({...TBL, startY: y + 8, headStyles:{fillColor:[238,241,246], textColor:20},
+      head:[['GST rate','Taxable','CGST','SGST','Total tax']],
+      body: rates.map(r => { const g = pb.by[r].g, a = r2(g/2); return [r + '%', RS(pb.by[r].t), RS(a), RS(r2(g - a)), RS(g)]; }),
+      foot:[['Total', {content:RS(pb.t), styles:{halign:'right'}}, '', '', {content:RS(pb.g), styles:{halign:'right'}}]],
+      columnStyles:{1:{halign:'right'}, 2:{halign:'right'}, 3:{halign:'right'}, 4:{halign:'right'}}});
+    y = doc.lastAutoTable.finalY + 20;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(60);
+    doc.text('Bill total ' + RS(pb.tot) + '   ' + (sup ? 'Paid' : 'Received') + ' on bills ' + RS(pb.paid) + '   Balance on these bills ' + RS(due), 40, y);
+    doc.setFontSize(8); doc.setTextColor(120);
+    doc.text('Payments made separately in the khata are not included here. See the account statement for the full balance.', 40, y + 14);
+    pdfFooter(doc);
+    saveFile((sup ? 'Purchases_' : 'Sales_') + safeName(p.name) + '.pdf', doc.output('blob'));
   }
   function openStatement(){
     const p = partyById(openId);
@@ -1227,12 +1406,17 @@ body.form-open .bottomnav{display:none}
     $$('[data-btab]').forEach(t => { const on = t.dataset.btab === tab; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
     const m = monthRange(monthOffset);
     $('#mLabel').textContent = m.label; $('#mNext').disabled = monthOffset >= 0;
-    const list = state.bills.filter(b => (tab === 'all' || b.kind === tab) && new Date(b.date) >= m.s && new Date(b.date) < m.e)
+    const list = state.bills.filter(b => (tab === 'all' || b.kind === tab) && (!billParty || b.partyId === billParty) && new Date(b.date) >= m.s && new Date(b.date) < m.e)
       .sort((a,b) => b.date.localeCompare(a.date));
     let tot = 0, gst = 0; list.forEach(b => { const c = billCalc(b); tot += c.total; gst += c.gst; });
     $('#bsCountL').textContent = tab === 'sale' ? 'Sales' : tab === 'purchase' ? 'Purchases' : 'Bills';
     $('#bsCount').textContent = list.length; $('#bsTotal').textContent = money(tot); $('#bsGst').textContent = money(gst);
     $('#billFabLabel').textContent = tab === 'purchase' ? 'NEW PURCHASE' : 'NEW SALE';
+    const pf = $('#billPartyFilter'), showType = tab === 'all' ? null : (tab === 'sale' ? 'customer' : 'supplier');
+    if (billParty && showType && (partyById(billParty) || {}).type !== showType) billParty = '';
+    partyOptions(pf, showType, billParty, !showType);
+    pf.options[0].textContent = 'All parties';
+    $('#regPdfLabel').textContent = 'Party-wise ' + (tab === 'sale' ? 'sales' : tab === 'purchase' ? 'purchases' : 'report') + ' (PDF)';
     $('#billList').innerHTML = list.length ? list.map(b => { const c = billCalc(b), due = r2(c.total - (b.paidNow||0));
       return `<button class="party" data-bill="${b.id}">
         <span class="avatar">${esc(initial(pname(b.partyId)))}</span>
@@ -1240,8 +1424,292 @@ body.form-open .bottomnav{display:none}
           <span class="pmeta"><span class="kind-tag ${b.kind}">${b.kind === 'sale' ? 'SALE' : 'PURCHASE'}</span>${esc(b.no)} · ${fmtDay(new Date(b.date))}</span></span>
         <span><span class="amt">${money(c.total)}</span><span class="amt-label">${due <= 0 ? 'Paid' : (b.paidNow ? 'Due ' + money(due) : 'On credit')}</span></span>
       </button>`; }).join('')
-      : `<div class="empty"><strong>No bills in ${esc(m.label)}</strong>Tap “${tab === 'purchase' ? 'New purchase' : 'New sale'}” to add one.</div>`;
+      : `<div class="empty"><strong>No bills ${billParty ? 'for ' + esc(pname(billParty)) + ' ' : ''}in ${esc(m.label)}</strong>Tap “${tab === 'purchase' ? 'New purchase' : 'New sale'}” to add one.</div>`;
   }
+
+  /* ================= shared PDF helpers ================= */
+  const RS = n => 'Rs. ' + inr2.format(Math.abs(n));        // built-in PDF fonts have no ₹ glyph
+  const RSs = n => (n < 0 ? '- ' : '') + RS(n);
+  function newPdf(){
+    if (!window.jspdf){ toast('PDF library did not load. Check your internet connection.'); return null; }
+    return new window.jspdf.jsPDF({unit:'pt', format:'a4'});
+  }
+  // Business letterhead + document title on the right. Returns the y below the header line.
+  function pdfHeader(doc, title, lines){
+    const b = state.biz, W = doc.internal.pageSize.getWidth();
+    doc.setFillColor(29, 79, 196); doc.rect(0, 0, W, 6, 'F');
+    doc.setTextColor(20); doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text(b.name, 40, 44);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90);
+    doc.text([b.place, b.gstin ? 'GSTIN: ' + b.gstin : ''].filter(Boolean), 40, 60);
+    doc.setTextColor(20); doc.setFont('helvetica','bold'); doc.setFontSize(13); doc.text(title, W-40, 44, {align:'right'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(lines.filter(Boolean), W-40, 60, {align:'right'});
+    doc.setDrawColor(220); doc.line(40, 84, W-40, 84); doc.setTextColor(20);
+    return 84;
+  }
+  function pdfFooter(doc){
+    const n = doc.getNumberOfPages(), W = doc.internal.pageSize.getWidth(), H = doc.internal.pageSize.getHeight();
+    for (let i = 1; i <= n; i++){ doc.setPage(i); doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(140);
+      doc.text('Generated on ' + fmtDay(new Date()) + ' · ' + state.biz.name, 40, H-24); doc.text('Page ' + i + ' of ' + n, W-40, H-24, {align:'right'}); }
+  }
+  const TBL = {styles:{fontSize:8.5, cellPadding:5, valign:'top'}, headStyles:{fillColor:[29,79,196], textColor:255}, footStyles:{fillColor:[238,241,246], textColor:20, fontStyle:'bold'}, margin:{left:40, right:40}};
+
+  // Indian-system amount in words, e.g. "Rupees Twelve Thousand Nine Hundred Ninety Two and Twenty Paise Only"
+  const ONES = ['','One','Two','Three','Four','Five','Six','Seven','Eight','Nine','Ten','Eleven','Twelve','Thirteen','Fourteen','Fifteen','Sixteen','Seventeen','Eighteen','Nineteen'];
+  const TENS = ['','','Twenty','Thirty','Forty','Fifty','Sixty','Seventy','Eighty','Ninety'];
+  const w2 = n => n < 20 ? ONES[n] : TENS[Math.floor(n/10)] + (n % 10 ? ' ' + ONES[n % 10] : '');
+  const w3 = n => { const h = Math.floor(n/100), r = n % 100; return [h ? ONES[h] + ' Hundred' : '', r ? w2(r) : ''].filter(Boolean).join(' '); };
+  function wInt(n){
+    if (n === 0) return 'Zero';
+    const cr = Math.floor(n/1e7), l = Math.floor(n/1e5) % 100, th = Math.floor(n/1e3) % 100, rest = n % 1000;
+    return [cr ? wInt(cr) + ' Crore' : '', l ? w2(l) + ' Lakh' : '', th ? w2(th) + ' Thousand' : '', rest ? w3(rest) : ''].filter(Boolean).join(' ');
+  }
+  function inWords(amount){
+    const t = Math.round(Math.abs(amount) * 100), r = Math.floor(t / 100), p = t % 100;
+    return 'Rupees ' + wInt(r) + (p ? ' and ' + w2(p) + ' Paise' : '') + ' Only';
+  }
+
+  /* ================= bill (invoice) PDF ================= */
+  function billPdf(bill){
+    const doc = newPdf(); if (!doc) return;
+    const p = partyById(bill.partyId) || {name:pname(bill.partyId)}, c = billCalc(bill), sale = bill.kind === 'sale';
+    const W = doc.internal.pageSize.getWidth();
+    let y = pdfHeader(doc, sale ? 'TAX INVOICE' : 'PURCHASE BILL', ['Bill no: ' + bill.no, 'Date: ' + dmy(new Date(bill.date))]);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(120); doc.text(sale ? 'BILL TO' : 'SUPPLIER', 40, y + 18);
+    doc.setTextColor(20); doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text(p.name, 40, y + 32);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90);
+    doc.text([p.phone ? 'Mobile: ' + p.phone : '', p.gstin ? 'GSTIN: ' + p.gstin : 'GSTIN: Unregistered'].filter(Boolean), 40, y + 46);
+    doc.setTextColor(20);
+    doc.autoTable({...TBL, startY: y + 70,
+      head:[['#','Item','Qty','Rate','Taxable','GST %','GST','Amount']],
+      body: bill.items.map((it, i) => { const t = r2(it.qty * it.rate), g = r2(t * it.gst / 100);
+        return [i+1, it.name, inr.format(it.qty), inr2.format(it.rate), inr2.format(t), it.gst + '%', inr2.format(g), inr2.format(t + g)]; }),
+      columnStyles:{0:{cellWidth:22}, 2:{halign:'right', cellWidth:40}, 3:{halign:'right', cellWidth:60}, 4:{halign:'right', cellWidth:66}, 5:{halign:'right', cellWidth:40}, 6:{halign:'right', cellWidth:56}, 7:{halign:'right', cellWidth:70}}
+    });
+    y = doc.lastAutoTable.finalY + 14;
+    // GST summary (intra-state: CGST + SGST)
+    const rates = Object.keys(c.by).map(Number).sort((a,b) => a-b).filter(r => c.by[r].t > 0);
+    let cg = 0, sg = 0;
+    const taxRows = rates.map(r => { const g = c.by[r].g, a = r2(g/2), b2 = r2(g - a); cg = r2(cg + a); sg = r2(sg + b2);
+      return [r + '%', inr2.format(c.by[r].t), inr2.format(a), inr2.format(b2), inr2.format(g)]; });
+    doc.autoTable({...TBL, startY: y, margin:{left:40, right:W/2 + 10}, styles:{...TBL.styles, fontSize:8},
+      headStyles:{fillColor:[238,241,246], textColor:20}, head:[['GST rate','Taxable','CGST','SGST','Total tax']], body: taxRows,
+      columnStyles:{1:{halign:'right'}, 2:{halign:'right'}, 3:{halign:'right'}, 4:{halign:'right'}}});
+    const taxEnd = doc.lastAutoTable.finalY;
+    const paid = bill.paidNow || 0, due = r2(c.total - paid);
+    doc.autoTable({startY: y, margin:{left:W/2 + 30, right:40}, theme:'plain', styles:{fontSize:9, cellPadding:4},
+      body:[['Taxable value', RS(c.taxable)], ['CGST', RS(cg)], ['SGST', RS(sg)], ['Bill total', RS(c.total)],
+        [sale ? 'Received' : 'Paid', RS(paid)], ['Balance due', RS(due)]],
+      columnStyles:{1:{halign:'right'}},
+      didParseCell: d => { if (d.row.index === 3 || d.row.index === 5){ d.cell.styles.fontStyle = 'bold'; } if (d.row.index === 3){ d.cell.styles.fillColor = [238,241,246]; d.cell.styles.fontSize = 10.5; } }});
+    y = Math.max(taxEnd, doc.lastAutoTable.finalY) + 22;
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(120); doc.text('AMOUNT IN WORDS', 40, y);
+    doc.setTextColor(20); doc.setFont('helvetica','bold'); doc.setFontSize(9.5);
+    doc.text(doc.splitTextToSize(inWords(c.total), W - 80), 40, y + 13);
+    y += 34;
+    if (bill.note){ doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(doc.splitTextToSize('Note: ' + bill.note, W - 80), 40, y); y += 24; }
+    doc.setTextColor(20); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+    doc.text('For ' + state.biz.name, W-40, y + 20, {align:'right'});
+    doc.setDrawColor(180); doc.line(W-190, y + 58, W-40, y + 58);
+    doc.setFontSize(8); doc.setTextColor(120); doc.text('Authorised signatory', W-40, y + 70, {align:'right'});
+    pdfFooter(doc);
+    saveFile((sale ? 'Invoice_' : 'Purchase_') + bill.no + '_' + safeName(p.name) + '.pdf', doc.output('blob'));
+  }
+
+  /* ================= monthly register PDF ================= */
+  // Party-wise sales / purchase report for the month shown on the Bills page
+  function regPdf(){
+    const doc = newPdf(); if (!doc) return;
+    const tab = state.billTab, m = monthRange(monthOffset);
+    const list = state.bills.filter(b => (tab === 'all' || b.kind === tab) && (!billParty || b.partyId === billParty) && new Date(b.date) >= m.s && new Date(b.date) < m.e)
+      .sort((a,b) => a.date.localeCompare(b.date));
+    if (!list.length) return toast('No bills in ' + m.label + ' to export.');
+    const title = tab === 'sale' ? 'PARTY-WISE SALES' : tab === 'purchase' ? 'PARTY-WISE PURCHASES' : 'PARTY-WISE SALES & PURCHASES';
+    let y = pdfHeader(doc, title, [billParty ? pname(billParty) : '', m.label, list.length + ' bills']);
+    const R = {halign:'right'};
+
+    // group bills: kind -> party
+    const sections = ['sale','purchase'].filter(k => tab === 'all' || tab === k).map(kind => {
+      const groups = {};
+      list.filter(b => b.kind === kind).forEach(b => {
+        const g = groups[b.partyId] = groups[b.partyId] || {pid:b.partyId, name:pname(b.partyId), gstin:(partyById(b.partyId)||{}).gstin || '', bills:[], t:0, g:0, tot:0, paid:0};
+        const c = billCalc(b); g.bills.push({b, c}); g.t = r2(g.t + c.taxable); g.g = r2(g.g + c.gst); g.tot = r2(g.tot + c.total); g.paid = r2(g.paid + (b.paidNow||0));
+      });
+      const arr = Object.values(groups).sort((a,b) => a.name.localeCompare(b.name));
+      const sum = arr.reduce((s,g) => ({n:s.n + g.bills.length, t:r2(s.t + g.t), g:r2(s.g + g.g), tot:r2(s.tot + g.tot), paid:r2(s.paid + g.paid)}), {n:0, t:0, g:0, tot:0, paid:0});
+      return {kind, arr, sum};
+    }).filter(sec => sec.arr.length);
+
+    // 1) party-wise summary
+    sections.forEach(sec => {
+      const sale = sec.kind === 'sale';
+      doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(20);
+      doc.text((sale ? 'Sales' : 'Purchases') + ' - summary by party', 40, y + 22);
+      doc.autoTable({...TBL, startY: y + 30,
+        head:[[sale ? 'Customer' : 'Supplier', 'GSTIN', {content:'Bills', styles:R}, {content:'Taxable', styles:R}, {content:'GST', styles:R}, {content:'Total', styles:R}, {content:sale ? 'Received' : 'Paid', styles:R}, {content:'Due', styles:R}]],
+        body: sec.arr.map(g => [g.name, g.gstin || '-', g.bills.length, inr2.format(g.t), inr2.format(g.g), inr2.format(g.tot), inr2.format(g.paid), inr2.format(r2(g.tot - g.paid))]),
+        foot:[['Total (' + sec.arr.length + ' parties)', '', {content:sec.sum.n, styles:R}, {content:inr2.format(sec.sum.t), styles:R}, {content:inr2.format(sec.sum.g), styles:R}, {content:inr2.format(sec.sum.tot), styles:R}, {content:inr2.format(sec.sum.paid), styles:R}, {content:inr2.format(r2(sec.sum.tot - sec.sum.paid)), styles:R}]],
+        styles:{...TBL.styles, fontSize:8}, columnStyles:{0:{fontStyle:'bold'}, 1:{cellWidth:88}, 2:R, 3:R, 4:R, 5:R, 6:R, 7:R}});
+      y = doc.lastAutoTable.finalY;
+    });
+    if (sections.length === 2){
+      const net = r2(sections[0].sum.g - sections[1].sum.g);
+      doc.setFont('helvetica','bold'); doc.setFontSize(10);
+      doc.text((net >= 0 ? 'Net GST payable (output - input): ' : 'GST credit to carry forward: ') + RS(net), 40, y + 20); y += 20;
+    }
+
+    // 2) bills grouped under each party
+    sections.forEach(sec => {
+      const sale = sec.kind === 'sale';
+      doc.addPage(); y = pdfHeader(doc, title, [billParty ? pname(billParty) : '', m.label]);
+      doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.text((sale ? 'Sales' : 'Purchases') + ' - bills by party', 40, y + 22);
+      const body = [];
+      sec.arr.forEach(g => {
+        body.push([{content:g.name + (g.gstin ? '   ·   GSTIN ' + g.gstin : ''), colSpan:7, styles:{fontStyle:'bold', fillColor:[231,237,251], textColor:[29,79,196]}}]);
+        g.bills.forEach(({b, c}) => { const due = r2(c.total - (b.paidNow||0));
+          body.push([dmy(new Date(b.date)), b.no, b.items.map(i => i.name + ' x ' + inr.format(i.qty)).join(', '),
+            inr2.format(c.taxable), inr2.format(c.gst), inr2.format(c.total), due > 0 ? inr2.format(due) : 'Paid']); });
+        const st = {fontStyle:'bold', fillColor:[246,247,249]};
+        body.push([{content:'', styles:st}, {content:'', styles:st}, {content:'Subtotal - ' + g.name + ' (' + g.bills.length + (g.bills.length === 1 ? ' bill)' : ' bills)'), styles:st},
+          {content:inr2.format(g.t), styles:{...st, ...R}}, {content:inr2.format(g.g), styles:{...st, ...R}}, {content:inr2.format(g.tot), styles:{...st, ...R}}, {content:inr2.format(r2(g.tot - g.paid)), styles:{...st, ...R}}]);
+      });
+      doc.autoTable({...TBL, startY: y + 30,
+        head:[['Date','Bill no','Items', {content:'Taxable', styles:R}, {content:'GST', styles:R}, {content:'Total', styles:R}, {content:'Due', styles:R}]],
+        body, foot:[['', '', 'Grand total', {content:inr2.format(sec.sum.t), styles:R}, {content:inr2.format(sec.sum.g), styles:R}, {content:inr2.format(sec.sum.tot), styles:R}, {content:inr2.format(r2(sec.sum.tot - sec.sum.paid)), styles:R}]],
+        styles:{...TBL.styles, fontSize:8}, columnStyles:{0:{cellWidth:58}, 1:{cellWidth:46}, 3:{...R, cellWidth:62}, 4:{...R, cellWidth:52}, 5:{...R, cellWidth:64}, 6:{...R, cellWidth:58}}});
+    });
+    pdfFooter(doc);
+    saveFile(title.replace(/[^A-Z]+/g, '_').replace(/_$/,'') + (billParty ? '_' + safeName(pname(billParty)) : '') + '_' + m.label.replace(' ', '_') + '.pdf', doc.output('blob'));
+  }
+
+  /* ================= profit & loss ================= */
+  function pnlRange(v){
+    const n = new Date(); let s, e;
+    if (v === 'month'){ s = new Date(n.getFullYear(), n.getMonth(), 1); e = new Date(n.getFullYear(), n.getMonth()+1, 0); }
+    else if (v === 'last'){ s = new Date(n.getFullYear(), n.getMonth()-1, 1); e = new Date(n.getFullYear(), n.getMonth(), 0); }
+    else if (v === 'fy' || v === 'lastfy'){ let y = n.getMonth() >= 3 ? n.getFullYear() : n.getFullYear()-1; if (v === 'lastfy') y--; s = new Date(y, 3, 1); e = new Date(y+1, 2, 31); }
+    else { const f = $('#pnlFrom').value, t = $('#pnlTo').value;
+      s = f ? new Date(f + 'T00:00:00') : new Date(n.getFullYear(), n.getMonth(), 1); e = t ? new Date(t + 'T00:00:00') : n; }
+    return {s, eEnd:new Date(e.getFullYear(), e.getMonth(), e.getDate()+1), key:ymd(s) + '_' + ymd(e), label:fmtDay(s) + ' to ' + fmtDay(e)};
+  }
+  function pnlData(rg){
+    const inR = iso => { const d = new Date(iso); return d >= rg.s && d < rg.eEnd; };
+    let sales = 0, purch = 0, nS = 0, nP = 0;
+    state.bills.forEach(b => { if (!inR(b.date)) return; const c = billCalc(b);
+      if (b.kind === 'sale'){ sales = r2(sales + c.taxable); nS++; } else { purch = r2(purch + c.taxable); nP++; } });
+    const st = state.stock[rg.key] || {open:0, close:0};
+    const gross = r2(sales - purch - (st.open||0) + (st.close||0));
+    const exps = state.expenses.filter(x => inR(x.date)).sort((a,b) => b.date.localeCompare(a.date));
+    const byCat = {}; exps.forEach(x => byCat[x.category] = r2((byCat[x.category]||0) + x.amount));
+    const expTotal = r2(exps.reduce((s,x) => s + x.amount, 0));
+    return {sales, purch, nS, nP, open:st.open||0, close:st.close||0, gross, exps, byCat, expTotal, net:r2(gross - expTotal), label:rg.label, key:rg.key};
+  }
+  const signedMoney = n => (n < 0 ? '−' : '') + money(n);
+  function renderPnl(keepInputs){
+    const v = $('#pnlPeriod').value;
+    $('#pnlFromWrap').hidden = $('#pnlToWrap').hidden = v !== 'custom';
+    const rg = pnlRange(v), d = pnlData(rg);
+    $('#pnlRangeLabel').textContent = d.label;
+    $('#pnlSales').textContent = money(d.sales); $('#pnlSalesN').textContent = '(' + d.nS + ' bills)';
+    $('#pnlPurch').textContent = money(d.purch); $('#pnlPurchN').textContent = '(' + d.nP + ' bills)';
+    if (!keepInputs){ $('#pnlOpen').value = d.open || ''; $('#pnlClose').value = d.close || ''; }
+    $('#pnlGrossL').textContent = d.gross >= 0 ? 'Gross profit' : 'Gross loss';
+    $('#pnlGross').textContent = signedMoney(d.gross); $('#pnlGross').className = 'a ' + (d.gross >= 0 ? 'give' : 'get');
+    $('#pnlExpCats').innerHTML = Object.keys(d.byCat).length
+      ? Object.entries(d.byCat).sort((a,b) => b[1]-a[1]).map(([k,a]) => `<div class="pl-row sub"><span>${esc(k)}</span><span class="a">${money(a)}</span></div>`).join('')
+      : '<div class="pl-row sub"><span>No expenses in this period</span><span class="a">₹0</span></div>';
+    $('#pnlExpTotal').textContent = money(d.expTotal);
+    const lbl = d.net >= 0 ? 'Net profit' : 'Net loss';
+    $('#pnlNetL').textContent = lbl; $('#pnlResultL').textContent = lbl;
+    $('#pnlNet').textContent = signedMoney(d.net); $('#pnlNet').className = 'a ' + (d.net >= 0 ? 'give' : 'get');
+    $('#pnlResult').textContent = signedMoney(d.net); $('#pnlResult').className = 'v num ' + (d.net >= 0 ? 'give' : 'get');
+    $('#pnlMargin').innerHTML = d.sales ? `Net margin <strong>${(d.net / d.sales * 100).toFixed(1)}%</strong> of sales<br>Gross margin ${(d.gross / d.sales * 100).toFixed(1)}%` : 'No sales in this period';
+    $('#pnlExpCount').textContent = d.exps.length + (d.exps.length === 1 ? ' entry' : ' entries');
+    $('#pnlExpList').innerHTML = d.exps.length ? d.exps.map(x => `
+      <button class="mini" data-exp="${x.id}"><span class="avatar">${esc(initial(x.category))}</span>
+        <span class="flex-grow-1 min-w-0"><span class="pname">${esc(x.category)}</span><span class="pmeta">${fmtDay(new Date(x.date))} · ${esc(x.mode || 'Cash')}${x.note ? ' · ' + esc(x.note) : ''}</span></span>
+        <span class="amt get">${money(x.amount)}</span></button>`).join('')
+      : '<div class="mini-empty">No expenses yet. Add rent, salary, electricity and other running costs to see your real profit.</div>';
+  }
+  function saveStock(){
+    const rg = pnlRange($('#pnlPeriod').value);
+    const open = r2(+$('#pnlOpen').value || 0), close = r2(+$('#pnlClose').value || 0);
+    if (open || close) state.stock[rg.key] = {open, close}; else delete state.stock[rg.key];
+    save(); renderPnl(true);
+  }
+  function pnlPdf(){
+    const doc = newPdf(); if (!doc) return;
+    const v = $('#pnlPeriod').value, d = pnlData(pnlRange(v)), W = doc.internal.pageSize.getWidth();
+    const y = pdfHeader(doc, 'PROFIT & LOSS STATEMENT', [d.label]);
+    const body = [
+      [{content:'Trading', colSpan:2, styles:{fontStyle:'bold', fillColor:[238,241,246]}}],
+      ['Sales (excluding GST) - ' + d.nS + ' bills', RS(d.sales)],
+      ['Less: Purchases (excluding GST) - ' + d.nP + ' bills', '(' + RS(d.purch) + ')'],
+      ['Less: Opening stock', '(' + RS(d.open) + ')'],
+      ['Add: Closing stock', RS(d.close)],
+      [{content:d.gross >= 0 ? 'Gross profit' : 'Gross loss', styles:{fontStyle:'bold'}}, {content:RSs(d.gross), styles:{fontStyle:'bold'}}],
+      [{content:'Expenses', colSpan:2, styles:{fontStyle:'bold', fillColor:[238,241,246]}}],
+      ...(Object.keys(d.byCat).length ? Object.entries(d.byCat).sort((a,b) => b[1]-a[1]).map(([k,a]) => ['   ' + k, '(' + RS(a) + ')']) : [['   No expenses', RS(0)]]),
+      [{content:'Total expenses', styles:{fontStyle:'bold'}}, {content:'(' + RS(d.expTotal) + ')', styles:{fontStyle:'bold'}}],
+    ];
+    doc.autoTable({...TBL, startY: y + 20, head:[['Particulars', {content:'Amount', styles:{halign:'right'}}]], body,
+      foot:[[d.net >= 0 ? 'NET PROFIT' : 'NET LOSS', {content:RSs(d.net), styles:{halign:'right'}}]],
+      footStyles:{...TBL.footStyles, fontSize:11, textColor: d.net >= 0 ? [11,122,64] : [198,40,40]},
+      styles:{...TBL.styles, fontSize:9.5, cellPadding:6}, columnStyles:{1:{halign:'right', cellWidth:140}}});
+    let y2 = doc.lastAutoTable.finalY + 18;
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90);
+    if (d.sales) { doc.text('Gross margin: ' + (d.gross / d.sales * 100).toFixed(1) + '%   Net margin: ' + (d.net / d.sales * 100).toFixed(1) + '% of sales', 40, y2); y2 += 14; }
+    doc.setFontSize(8); doc.setTextColor(120);
+    doc.text(doc.splitTextToSize('All figures exclude GST. Stock values are as entered for this period. This statement is prepared from the bills and expenses recorded in the app and is not an audited account.', W - 80), 40, y2 + 4);
+    if (d.exps.length){
+      doc.addPage(); const y3 = pdfHeader(doc, 'EXPENSE DETAILS', [d.label]);
+      doc.autoTable({...TBL, startY: y3 + 16, head:[['Date','Category','Paid by','Details','Amount']],
+        body: [...d.exps].reverse().map(x => [dmy(new Date(x.date)), x.category, x.mode || 'Cash', x.note || '', inr2.format(x.amount)]),
+        foot:[['', 'Total', '', '', inr2.format(d.expTotal)]], columnStyles:{0:{cellWidth:62}, 4:{halign:'right', cellWidth:80}}});
+    }
+    pdfFooter(doc);
+    saveFile('Profit_and_Loss_' + d.key + '.pdf', doc.output('blob'));
+  }
+
+  /* ================= expense form ================= */
+  function openExpense(id){
+    const x = id ? state.expenses.find(e => e.id === id) : null;
+    expEditId = x ? x.id : null;
+    $('#expCat').innerHTML = [...new Set([...EXP_CATS, ...(x ? [x.category] : [])])].map(c => `<option${x && x.category === c ? ' selected' : ''}>${esc(c)}</option>`).join('');
+    $('#expAmount').value = x ? x.amount : ''; $('#expNote').value = x ? x.note : '';
+    $('#expDate').value = ymd(x ? new Date(x.date) : new Date());
+    const mode = x ? (x.mode || 'Cash') : 'Cash';
+    $('#expCash').checked = mode === 'Cash'; $('#expUpi').checked = mode === 'UPI'; $('#expBank').checked = mode === 'Bank';
+    $('#expTitle').textContent = x ? 'Edit expense' : 'Add expense';
+    $('#deleteExpBtn').hidden = !x; $('#expAmountError').hidden = true;
+    modal('expModal')?.show();
+  }
+  $('#expForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const amount = r2(+$('#expAmount').value || 0);
+    if (!(amount > 0)){ $('#expAmountError').hidden = false; $('#expAmount').focus(); return; }
+    const old = expEditId ? state.expenses.find(e => e.id === expEditId) : null;
+    const data = {category:$('#expCat').value, amount, note:$('#expNote').value.trim(),
+      mode:($('input[name=expMode]:checked') || {value:'Cash'}).value, date:withDate($('#expDate').value, old && old.date)};
+    if (old) Object.assign(old, data); else state.expenses.push({id:uid(), ...data});
+    save(); modal('expModal')?.hide(); render(); toast(old ? 'Expense updated' : 'Expense saved');
+  });
+  $('#expAmount').addEventListener('input', () => { $('#expAmountError').hidden = true; });
+  $('#deleteExpBtn').addEventListener('click', () => {
+    state.expenses = state.expenses.filter(e => e.id !== expEditId);
+    save(); modal('expModal')?.hide(); render(); toast('Expense deleted');
+  });
+  $('#addExpBtn').addEventListener('click', () => openExpense());
+  $('#addExpBtn2').addEventListener('click', () => openExpense());
+  $('#pnlExpList').addEventListener('click', e => { const b = e.target.closest('[data-exp]'); if (b) openExpense(b.dataset.exp); });
+  $('#pnlPeriod').addEventListener('change', () => {
+    if ($('#pnlPeriod').value === 'custom' && !$('#pnlFrom').value){ const n = new Date(); $('#pnlFrom').value = ymd(new Date(n.getFullYear(), n.getMonth(), 1)); $('#pnlTo').value = ymd(n); }
+    renderPnl();
+  });
+  ['#pnlFrom','#pnlTo'].forEach(s => $(s).addEventListener('change', () => renderPnl()));
+  ['#pnlOpen','#pnlClose'].forEach(s => $(s).addEventListener('input', saveStock));
+  $('#pnlPdfBtn').addEventListener('click', pnlPdf);
+  $('#regPdfBtn').addEventListener('click', regPdf);
+  $('#billPdfBtn').addEventListener('click', () => { const b = state.bills.find(x => x.id === billDraft.id); if (b) billPdf(b); });
 
   /* ================= party & settings forms ================= */
   function openPartyForm(mode, type){
@@ -1283,6 +1751,8 @@ body.form-open .bottomnav{display:none}
   }));
   $$('[data-btab]').forEach(t => t.addEventListener('click', () => { state.billTab = t.dataset.btab; save(); renderBills(); }));
   $('#mPrev').addEventListener('click', () => { monthOffset--; renderBills(); });
+  $('#billPartyFilter').addEventListener('change', e => { billParty = e.target.value; renderBills(); });
+  $('#pbPdfBtn').addEventListener('click', partyBillsPdf);
   $('#mNext').addEventListener('click', () => { if (monthOffset < 0){ monthOffset++; renderBills(); } });
   $('#billList').addEventListener('click', e => { const b = e.target.closest('[data-bill]'); if (b){ const bill = state.bills.find(x => x.id === b.dataset.bill); openBill(bill.kind, bill.partyId, bill.id); } });
   $('#addBillBtn').addEventListener('click', () => openBill(state.billTab === 'purchase' ? 'purchase' : 'sale', ''));
@@ -1448,7 +1918,7 @@ body.form-open .bottomnav{display:none}
   layout(); render();
 
   // exposed for automated checks only
-  window.__khata = {billCalc, statementData:(pid) => { refreshRows(); return statementData(pid); }, balOf:(pid) => { refreshRows(); return balOf(pid); }, get state(){ return state; }};
+  window.__khata = {billCalc, inWords, pnlData, pnlRange, billPdf, regPdf, pnlPdf, statementData:(pid) => { refreshRows(); return statementData(pid); }, balOf:(pid) => { refreshRows(); return balOf(pid); }, get state(){ return state; }};
 })();
 </script>
 </body>
