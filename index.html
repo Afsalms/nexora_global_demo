@@ -1,0 +1,1455 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Khata Ledger</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: phone = one page + bottom nav; desktop = side nav + page (Khata page splits list | ledger) */
+:root{
+  --brand:#1d4fc4; --brand-ink:#ffffff; --brand-soft:#e7edfb; --brand-text:#1d4fc4;
+  --get:#c62828; --get-soft:#fdf0f0; --get-btn:#c62828;
+  --give:#0b7a40; --give-soft:#eef8f2; --give-btn:#0b7a40;
+  --fab:#c2185b; --on-solid:#ffffff;
+  --bg:#eef1f6; --surface:#ffffff; --fg:#17202e; --muted:#667085; --line:#e4e8ef;
+  --shadow:0 1px 3px rgba(16,24,40,.08);
+  --font:"Noto Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brand:#1f3f8f; --brand-ink:#ffffff; --brand-soft:#1b2540; --brand-text:#9db8ff;
+    --get:#ff7a7a; --get-soft:#2a1719; --get-btn:#c63b3b;
+    --give:#4fd18f; --give-soft:#132a1f; --give-btn:#178a52;
+    --fab:#c2185b; --on-solid:#ffffff;
+    --bg:#0d1117; --surface:#161b24; --fg:#e7ebf2; --muted:#98a2b3; --line:#262e3b;
+    --shadow:0 1px 3px rgba(0,0,0,.4);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --brand:#1f3f8f; --brand-ink:#ffffff; --brand-soft:#1b2540; --brand-text:#9db8ff;
+  --get:#ff7a7a; --get-soft:#2a1719; --get-btn:#c63b3b;
+  --give:#4fd18f; --give-soft:#132a1f; --give-btn:#178a52;
+  --fab:#c2185b; --on-solid:#ffffff;
+  --bg:#0d1117; --surface:#161b24; --fg:#e7ebf2; --muted:#98a2b3; --line:#262e3b;
+  --shadow:0 1px 3px rgba(0,0,0,.4);
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--font);font-size:15px;-webkit-tap-highlight-color:transparent}
+.min-w-0{min-width:0}
+button{font-family:inherit}
+:focus-visible{outline:2px solid var(--brand-text);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums}
+.give{color:var(--give)} .get{color:var(--get)} .zero{color:var(--muted)}
+
+/* Shell */
+.shell{height:100%;display:flex;flex-direction:column}
+.main{flex:1;min-height:0;position:relative}
+.page{height:100%;position:relative}
+.col{position:relative;display:flex;flex-direction:column;height:100%;min-height:0;background:var(--bg)}
+.scroll{flex:1;min-height:0;overflow-y:auto}
+.split{height:100%}
+.sidenav{display:none}
+.bottomnav{display:grid;grid-template-columns:repeat(3,1fr);background:var(--surface);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px);flex-shrink:0}
+.bn-btn{background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 0 7px;font-size:11px;font-weight:600}
+.bn-btn.active{color:var(--brand-text)}
+body.ledger-open .bottomnav{display:none}
+
+/* App bar */
+.appbar{background:var(--brand);color:var(--brand-ink);flex-shrink:0}
+.biz-icon{width:38px;height:38px;border-radius:10px;background:rgba(255,255,255,.18);display:grid;place-items:center;font-weight:700;font-size:14px;flex-shrink:0}
+.biz-name{font-weight:600;font-size:17px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.biz-sub{font-size:12px;opacity:.8}
+.tabs{display:flex}
+.tab{flex:1;background:none;border:0;color:var(--brand-ink);opacity:.7;font-weight:600;font-size:13px;letter-spacing:.06em;padding:12px 0 10px;border-bottom:3px solid transparent}
+.tab.active{opacity:1;border-bottom-color:var(--brand-ink)}
+.icon-btn{background:none;border:0;color:var(--brand-ink);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.icon-btn:active,.icon-btn:hover{background:rgba(255,255,255,.15)}
+
+/* Dashboard */
+.dash{padding:16px;display:flex;flex-direction:column;gap:14px;max-width:1040px;margin:0 auto;padding-bottom:28px}
+.hello{font-size:13px;color:var(--muted)}
+.hello strong{display:block;color:var(--fg);font-size:19px;font-weight:600}
+.tiles{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.tile{background:var(--surface);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:2px;border:0;text-align:left;color:var(--fg)}
+.tile-top{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}
+.dot{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;flex-shrink:0}
+.dot.get{background:var(--get-soft)} .dot.give{background:var(--give-soft)}
+.tile-amt{font-size:22px;font-weight:700;line-height:1.3;font-variant-numeric:tabular-nums}
+.tile-sub{font-size:12px;color:var(--muted)}
+.sec{background:var(--surface);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.sec-h{display:flex;justify-content:space-between;align-items:center;padding:12px 16px 4px;font-weight:600;font-size:14px}
+.sec-h a,.sec-h button{font-size:12px;font-weight:600;color:var(--brand-text);background:none;border:0;text-decoration:none}
+.month-grid{display:grid;grid-template-columns:1fr 1fr;padding:4px 0}
+.mstat{padding:8px 16px}
+.mstat .l{font-size:12px;color:var(--muted)} .mstat .v{font-size:17px;font-weight:600;font-variant-numeric:tabular-nums}
+.gst-net{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 16px;border-top:1px solid var(--line);font-size:13px;background:var(--brand-soft)}
+.gst-net strong{font-variant-numeric:tabular-nums}
+.qa{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.qa-btn{background:var(--surface);border:0;border-radius:14px;padding:12px 4px 10px;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--fg);box-shadow:var(--shadow)}
+.qa-btn:hover{background:var(--brand-soft)}
+.qa-ic{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:var(--brand-soft);color:var(--brand-text)}
+.qa-ic.sale{background:var(--give-soft);color:var(--give)} .qa-ic.pur{background:var(--get-soft);color:var(--get)}
+.dash-lists{display:grid;gap:14px}
+.mini{display:flex;align-items:center;gap:12px;width:100%;padding:10px 16px;border:0;border-top:1px solid var(--line);background:none;color:var(--fg);text-align:left}
+.mini:first-of-type{border-top:0}
+.mini:hover{background:var(--brand-soft)}
+.mini .avatar{width:34px;height:34px;font-size:14px}
+.mini-empty{padding:12px 16px 16px;font-size:13px;color:var(--muted)}
+
+/* Summary + search (khata) */
+.summary{margin:12px 16px 0;background:var(--surface);border-radius:12px;display:grid;grid-template-columns:1fr 1fr;box-shadow:var(--shadow)}
+.summary>div{padding:14px 16px}
+.summary>div+div{border-left:1px solid var(--line)}
+.sum-amt{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.3}
+.sum-label{font-size:12px;color:var(--muted)}
+.toolbar{display:flex;gap:10px;align-items:center;padding:12px 16px}
+.search{position:relative;flex:1;min-width:0}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search .form-control{padding-left:38px;border-radius:10px;background:var(--surface);border-color:var(--line);color:var(--fg)}
+.count{font-size:12px;color:var(--muted);white-space:nowrap}
+
+/* Party list */
+.list{padding-bottom:96px}
+.party{display:flex;gap:12px;align-items:center;width:100%;padding:12px 16px;background:var(--surface);border:0;border-bottom:1px solid var(--line);color:var(--fg);text-align:left}
+.party:hover{background:var(--brand-soft)}
+.party.active{background:var(--brand-soft);box-shadow:inset 3px 0 0 var(--brand-text)}
+.avatar{width:42px;height:42px;border-radius:50%;background:var(--brand-soft);color:var(--brand-text);display:grid;place-items:center;font-weight:700;font-size:16px;flex-shrink:0}
+.pname{display:block;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pmeta{display:block;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.amt{display:block;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.amt-label{display:block;font-size:11px;color:var(--muted);text-align:right;white-space:nowrap}
+.empty{padding:40px 24px;text-align:center;color:var(--muted)}
+.empty strong{display:block;color:var(--fg);font-weight:600;margin-bottom:4px}
+.fab{position:absolute;right:16px;bottom:16px;background:var(--fab);color:var(--on-solid);border:0;border-radius:999px;padding:12px 20px 12px 16px;font-weight:600;font-size:14px;letter-spacing:.03em;display:flex;align-items:center;gap:6px;box-shadow:0 4px 12px rgba(194,24,91,.35);z-index:5}
+
+/* Party ledger */
+.p-avatar{width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,.2);display:grid;place-items:center;font-weight:700;flex-shrink:0}
+.p-name{font-weight:600;font-size:16px;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.p-phone{font-size:12px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bal-card{margin:12px 16px 0;background:var(--surface);border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:var(--shadow)}
+.bal-label{font-size:14px}
+.bal-amt{font-size:20px;font-weight:700;font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:8px;padding:12px 16px;overflow-x:auto}
+.chip-btn{flex-shrink:0;display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);color:var(--brand-text);border-radius:999px;padding:7px 14px;font-size:13px;font-weight:600}
+.chip-btn:hover{background:var(--brand-soft)}
+.cols{display:grid;grid-template-columns:minmax(0,1fr) 92px 92px}
+.cols-head{font-size:11px;font-weight:600;letter-spacing:.06em;color:var(--muted);padding:0 0 6px}
+.cols-head span:first-child{padding-left:16px}
+.cols-head span:not(:first-child){text-align:right;padding-right:12px}
+.entry{width:100%;border:0;border-bottom:1px solid var(--line);background:var(--surface);color:var(--fg);text-align:left;padding:0}
+.entry:hover .e-main{background:var(--brand-soft)}
+.e-main{padding:10px 8px 10px 16px;display:flex;flex-direction:column;gap:3px;min-width:0}
+.e-date{font-size:12px;color:var(--muted)}
+.e-tag{align-self:flex-start;font-size:11px;font-weight:600;color:var(--brand-text);background:var(--brand-soft);border-radius:4px;padding:1px 6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.e-bal{align-self:flex-start;font-size:11px;font-weight:600;border-radius:4px;padding:1px 6px;background:var(--bg);font-variant-numeric:tabular-nums}
+.e-note{font-size:13px;overflow-wrap:anywhere;white-space:pre-line}
+.e-gave,.e-got{padding:10px 12px;text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+.e-gave{background:var(--get-soft);color:var(--get)}
+.e-got{background:var(--give-soft);color:var(--give)}
+.actionbar{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);flex-shrink:0}
+.btn-solid{border:0;border-radius:10px;padding:13px 8px;font-weight:700;letter-spacing:.04em;color:var(--on-solid)}
+.btn-gave{background:var(--get-btn)} .btn-got{background:var(--give-btn)}
+.empty-pane{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;height:100%;color:var(--muted);text-align:center;padding:24px;background:var(--bg)}
+.empty-pane svg{color:var(--brand-text);opacity:.6}
+.empty-pane strong{color:var(--fg);font-weight:600;font-size:16px}
+
+/* Bills page */
+.month-nav{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px 0}
+.month-nav button{background:var(--surface);border:1px solid var(--line);color:var(--fg);width:36px;height:36px;border-radius:10px;display:grid;place-items:center}
+.month-nav button:disabled{opacity:.4}
+.month-nav strong{font-weight:600}
+.bill-sum{margin:12px 16px;background:var(--surface);border-radius:12px;display:grid;grid-template-columns:repeat(3,1fr);box-shadow:var(--shadow)}
+.bill-sum>div{padding:12px 14px}
+.bill-sum>div+div{border-left:1px solid var(--line)}
+.bill-sum .l{font-size:11px;color:var(--muted)} .bill-sum .v{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums}
+.kind-tag{font-size:10px;font-weight:700;letter-spacing:.05em;border-radius:4px;padding:1px 6px;margin-right:6px}
+.kind-tag.sale{background:var(--give-soft);color:var(--give)} .kind-tag.purchase{background:var(--get-soft);color:var(--get)}
+
+/* Modals and forms */
+.modal-content{border:0;border-radius:16px}
+.modal-content.t-gave{border-top:4px solid var(--get-btn)}
+.modal-content.t-got{border-top:4px solid var(--give-btn)}
+@media (max-width:575.98px){.modal-fullscreen-sm-down .modal-content{border-radius:0}}
+.amount-wrap{position:relative}
+.amount-wrap span{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:22px;font-weight:600;color:var(--muted)}
+.amount-wrap input{padding-left:36px;font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.seg .btn{font-weight:600;font-size:13px}
+.btn-check:checked+.btn.seg-gave{background:var(--get-btn);border-color:var(--get-btn);color:var(--on-solid)}
+.btn-check:checked+.btn.seg-got{background:var(--give-btn);border-color:var(--give-btn);color:var(--on-solid)}
+textarea.form-control{resize:vertical;min-height:72px}
+.lbl{font-size:12px;color:var(--muted);margin-bottom:4px;display:block}
+.bill-item{border:1px solid var(--line);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:8px}
+.bi-grid{display:grid;grid-template-columns:1fr 1.3fr 1fr;gap:8px}
+.bi-foot{display:flex;justify-content:space-between;font-size:12px;color:var(--muted)}
+.bi-foot strong{color:var(--fg);font-variant-numeric:tabular-nums}
+.totals{border-radius:12px;background:var(--bg);padding:10px 14px;display:flex;flex-direction:column;gap:4px;font-size:13px}
+.totals div{display:flex;justify-content:space-between;gap:8px}
+.totals span:last-child{font-variant-numeric:tabular-nums}
+.totals .grand{font-size:16px;font-weight:700;border-top:1px solid var(--line);padding-top:6px;margin-top:2px}
+.preview{border-radius:12px;background:var(--bg);padding:10px 14px;font-size:13px;display:flex;flex-direction:column;gap:6px}
+.preview div{display:flex;justify-content:space-between;gap:10px}
+.rate-chip{display:inline-flex;align-items:center;gap:4px;background:var(--brand-soft);color:var(--brand-text);border-radius:999px;padding:4px 6px 4px 12px;font-weight:600;font-size:13px}
+.rate-chip button{background:none;border:0;color:inherit;width:22px;height:22px;border-radius:50%;line-height:1}
+.rate-chip button:hover{background:rgba(0,0,0,.08)}
+.stmt-sum{display:grid;grid-template-columns:1fr 1fr;gap:6px 12px;background:var(--bg);border-radius:12px;padding:12px 14px;font-size:13px}
+.stmt-sum span:nth-child(even){text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+
+
+/* Form pages */
+.fpage{position:absolute;inset:0;z-index:30;background:var(--bg)}
+.fp-form{display:flex;flex-direction:column;height:100%}
+.fp-bar{display:flex;align-items:center;gap:6px;padding:8px;min-height:56px}
+.fp-bar h1{font-size:17px;font-weight:600;margin:0;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fp-form.t-gave .fp-bar{background:var(--get-btn)}
+.fp-form.t-got .fp-bar{background:var(--give-btn)}
+.fp-body{flex:1;min-height:0;overflow-y:auto;padding:16px}
+.fp-inner{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+.fcard{background:var(--surface);border-radius:14px;padding:14px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+.fcard-title{font-weight:600;font-size:14px}
+.fp-foot{flex-shrink:0;background:var(--surface);border-top:1px solid var(--line);padding:10px 16px calc(10px + env(safe-area-inset-bottom,0px))}
+.fp-foot-inner{max-width:680px;margin:0 auto;display:flex;gap:10px}
+.fp-foot .btn{padding:12px 16px;font-weight:600;border-radius:10px}
+.fp-foot .btn-primary{flex:1}
+.fp-two{display:grid;grid-template-columns:1fr 1fr}
+body.form-open .bottomnav{display:none}
+@media (min-width: 992px){ .fp-foot .btn-primary{flex:0 0 auto;min-width:180px;margin-left:auto} .fp-body{padding:24px} }
+.toast-msg{position:fixed;left:50%;bottom:calc(96px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-size:13px;z-index:2000;max-width:calc(100% - 32px);text-align:center}
+
+/* Desktop */
+@media (min-width: 992px){
+  .shell{display:grid;grid-template-columns:232px minmax(0,1fr)}
+  .bottomnav{display:none!important}
+  .sidenav{display:flex;flex-direction:column;gap:4px;background:var(--surface);border-right:1px solid var(--line);padding:16px 12px;min-height:0}
+  .brand{display:flex;align-items:center;gap:10px;padding:4px 6px 16px}
+  .brand .biz-icon{background:var(--brand);color:var(--brand-ink)}
+  .brand-name{font-weight:600;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand-sub{font-size:12px;color:var(--muted)}
+  .nav-btn{display:flex;align-items:center;gap:10px;background:none;border:0;border-radius:10px;padding:10px 12px;color:var(--fg);font-weight:500;text-align:left}
+  .nav-btn:hover{background:var(--bg)}
+  .nav-btn.active{background:var(--brand-soft);color:var(--brand-text);font-weight:600}
+  .split{display:grid;grid-template-columns:380px minmax(0,1fr)}
+  #partyView,.empty-pane{border-left:1px solid var(--line)}
+  #backBtn{display:none}
+  .appbar.party-bar{min-height:64px;padding-inline:16px!important}
+  .cols{grid-template-columns:minmax(0,1fr) 150px 150px}
+  .cols-head span:not(:first-child),.e-gave,.e-got{padding-right:20px}
+  .bal-card{margin:16px 20px 0}
+  .chips{padding-inline:20px}
+  .actionbar{grid-template-columns:repeat(2,minmax(0,200px));justify-content:end;padding-inline:20px}
+  .dash{padding:24px}
+  .tiles{grid-template-columns:1fr 1fr}
+  .dash-lists{grid-template-columns:1fr 1fr;align-items:start}
+  .bills-wrap{max-width:900px;margin:0 auto;width:100%}
+  .toast-msg{bottom:32px}
+  .hide-desk{display:none!important}
+}
+@media (max-width: 991.98px){.hide-mob{display:none!important}}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Desktop side navigation -->
+  <nav class="sidenav" aria-label="Main">
+    <div class="brand">
+      <div class="biz-icon" id="sideIcon">SK</div>
+      <div class="min-w-0"><div class="brand-name" id="sideName"></div><div class="brand-sub" id="sidePlace"></div></div>
+    </div>
+    <button class="nav-btn" data-go="home">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>Dashboard</button>
+    <button class="nav-btn" data-go="khata">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h12M8 8h7"/></svg>Khata</button>
+    <button class="nav-btn" data-go="bills">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Sales &amp; purchases</button>
+    <div class="flex-grow-1"></div>
+    <button class="nav-btn" data-settings>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3h0a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8v0a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Settings</button>
+  </nav>
+
+  <main class="main">
+
+    <!-- DASHBOARD -->
+    <section class="page col" data-page="home">
+      <header class="appbar d-flex align-items-center gap-2 px-3 py-3">
+        <div class="biz-icon" id="homeIcon">SK</div>
+        <div class="flex-grow-1 min-w-0"><div class="biz-name" id="homeName"></div><div class="biz-sub" id="homePlace"></div></div>
+        <button class="icon-btn hide-desk" data-settings aria-label="Settings">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        </button>
+      </header>
+      <div class="scroll">
+        <div class="dash">
+          <div class="hello"><strong id="hello">Good morning</strong><span id="today"></span></div>
+
+          <div class="tiles">
+            <button class="tile" data-go-tab="customer">
+              <span class="tile-top"><span class="dot get"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--get)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></span>You will get</span>
+              <span class="tile-amt get" id="dGet">₹0</span>
+              <span class="tile-sub" id="dGetSub"></span>
+            </button>
+            <button class="tile" data-go-tab="supplier">
+              <span class="tile-top"><span class="dot give"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--give)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></span>You will give</span>
+              <span class="tile-amt give" id="dGive">₹0</span>
+              <span class="tile-sub" id="dGiveSub"></span>
+            </button>
+          </div>
+
+          <div class="qa">
+            <button class="qa-btn" data-qa="sale"><span class="qa-ic sale"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M12 8v6M9 11h6"/></svg></span>New sale</button>
+            <button class="qa-btn" data-qa="purchase"><span class="qa-ic pur"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1.5 12h-11z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span>Purchase</button>
+            <button class="qa-btn" data-qa="transfer"><span class="qa-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg></span>Transfer</button>
+            <button class="qa-btn" data-qa="party"><span class="qa-ic"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="10" cy="8" r="4"/><path d="M3 20a7 7 0 0 1 14 0M19 8v6M16 11h6"/></svg></span>Add party</button>
+          </div>
+
+          <div class="sec">
+            <div class="sec-h"><span id="monthTitle">This month</span><button data-go="bills">View bills</button></div>
+            <div class="month-grid">
+              <div class="mstat"><div class="l">Sales</div><div class="v" id="mSales">₹0</div></div>
+              <div class="mstat"><div class="l">Purchases</div><div class="v" id="mPurch">₹0</div></div>
+              <div class="mstat"><div class="l">GST collected on sales</div><div class="v" id="mGstOut">₹0</div></div>
+              <div class="mstat"><div class="l">GST paid on purchases</div><div class="v" id="mGstIn">₹0</div></div>
+            </div>
+            <div class="gst-net"><span id="gstNetLabel">Net GST payable</span><strong id="gstNet">₹0</strong></div>
+          </div>
+
+          <div class="dash-lists">
+            <div class="sec"><div class="sec-h"><span>To collect</span><button data-go-tab="customer">All customers</button></div><div id="dueList"></div></div>
+            <div class="sec"><div class="sec-h"><span>Recent activity</span></div><div id="recentList"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KHATA -->
+    <section class="page" data-page="khata" hidden>
+      <div class="split">
+        <section id="listView" class="col">
+          <header class="appbar">
+            <div class="d-flex align-items-center gap-2 px-3 pt-3 pb-1">
+              <div class="flex-grow-1 min-w-0"><div class="biz-name">Khata</div><div class="biz-sub">Customers and suppliers</div></div>
+            </div>
+            <nav class="tabs" role="tablist">
+              <button class="tab active" data-tab="customer" role="tab">CUSTOMERS</button>
+              <button class="tab" data-tab="supplier" role="tab">SUPPLIERS</button>
+            </nav>
+          </header>
+          <div class="scroll" id="listScroll">
+            <div class="summary">
+              <div><div class="sum-label">You will give</div><div class="sum-amt give" id="sumGive">₹0</div></div>
+              <div><div class="sum-label">You will get</div><div class="sum-amt get" id="sumGet">₹0</div></div>
+            </div>
+            <div class="toolbar">
+              <label class="search mb-0">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input id="searchInput" type="search" class="form-control" placeholder="Search customers" autocomplete="off">
+              </label>
+              <span class="count" id="partyCount"></span>
+            </div>
+            <div class="list" id="partyList"></div>
+          </div>
+          <button class="fab" id="addPartyBtn">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+            <span id="fabLabel">ADD CUSTOMER</span>
+          </button>
+        </section>
+
+        <section id="partyView" class="col" hidden>
+          <header class="appbar party-bar d-flex align-items-center gap-2 px-2 py-2">
+            <button class="icon-btn" id="backBtn" aria-label="Back">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            </button>
+            <div class="p-avatar" id="pAvatar">R</div>
+            <div class="flex-grow-1 min-w-0"><div class="p-name" id="pName"></div><div class="p-phone" id="pPhone"></div></div>
+            <div class="dropdown">
+              <button class="icon-btn" data-bs-toggle="dropdown" aria-label="More options">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><button class="dropdown-item" id="editPartyBtn">Edit details</button></li>
+                <li><button class="dropdown-item text-danger" id="deletePartyBtn">Delete</button></li>
+              </ul>
+            </div>
+          </header>
+          <div class="scroll" id="partyScroll">
+            <div class="bal-card"><span class="bal-label" id="balLabel">You will get</span><span class="bal-amt" id="balAmt">₹0</span></div>
+            <div class="chips">
+              <button class="chip-btn" id="billChip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M12 8v6M9 11h6"/></svg><span id="billChipLabel">New sale</span></button>
+              <button class="chip-btn" id="transferChip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h14l-4-4M20 16H6l4 4"/></svg>Transfer</button>
+              <button class="chip-btn" id="stmtChip"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>Statement</button>
+            </div>
+            <div class="cols cols-head"><span id="entryCount">ENTRIES</span><span id="headGave">YOU GAVE</span><span id="headGot">YOU GOT</span></div>
+            <div id="entryList"></div>
+          </div>
+          <footer class="actionbar">
+            <button class="btn-solid btn-gave" id="gaveBtn">YOU GAVE ₹</button>
+            <button class="btn-solid btn-got" id="gotBtn">YOU GOT ₹</button>
+          </footer>
+        </section>
+
+        <div class="empty-pane" id="emptyPane" hidden>
+          <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h12M8 8h7"/></svg>
+          <strong id="emptyPaneTitle">Select a customer</strong>
+          <span>Their khata with every entry and the running balance opens here.</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SALES & PURCHASES -->
+    <section class="page col" data-page="bills" hidden>
+      <header class="appbar">
+        <div class="d-flex align-items-center gap-2 px-3 pt-3 pb-1">
+          <div class="flex-grow-1 min-w-0"><div class="biz-name">Sales &amp; purchases</div><div class="biz-sub">Bills with GST</div></div>
+        </div>
+        <nav class="tabs" role="tablist">
+          <button class="tab" data-btab="all" role="tab">ALL</button>
+          <button class="tab" data-btab="sale" role="tab">SALES</button>
+          <button class="tab" data-btab="purchase" role="tab">PURCHASES</button>
+        </nav>
+      </header>
+      <div class="scroll">
+        <div class="bills-wrap">
+          <div class="month-nav">
+            <button id="mPrev" aria-label="Previous month"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m15 18-6-6 6-6"/></svg></button>
+            <strong id="mLabel">October 2026</strong>
+            <button id="mNext" aria-label="Next month"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></button>
+          </div>
+          <div class="bill-sum">
+            <div><div class="l" id="bsCountL">Bills</div><div class="v" id="bsCount">0</div></div>
+            <div><div class="l">Total</div><div class="v" id="bsTotal">₹0</div></div>
+            <div><div class="l">GST</div><div class="v" id="bsGst">₹0</div></div>
+          </div>
+          <div class="list" id="billList"></div>
+        </div>
+      </div>
+      <button class="fab" id="addBillBtn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+        <span id="billFabLabel">NEW SALE</span>
+      </button>
+    </section>
+    <!-- ===== Form pages (full screen on phone, fill the content area on desktop) ===== -->
+
+    <!-- Entry page -->
+    <section class="fpage" id="entryModal" hidden>
+      <form class="fp-form" id="entryForm" novalidate>
+        <header class="appbar fp-bar">
+          <button type="button" class="icon-btn" data-close aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <h1 id="entryTitle">You gave</h1>
+        </header>
+        <div class="fp-body"><div class="fp-inner">
+          <div class="fcard">
+            <div class="btn-group seg w-100" role="group">
+              <input type="radio" class="btn-check" name="entryType" id="typeGave" value="gave">
+              <label class="btn btn-outline-secondary seg-gave" for="typeGave" id="typeGaveLabel">You gave</label>
+              <input type="radio" class="btn-check" name="entryType" id="typeGot" value="got">
+              <label class="btn btn-outline-secondary seg-got" for="typeGot" id="typeGotLabel">You got</label>
+            </div>
+            <div>
+              <label for="entryAmount" class="lbl">Amount</label>
+              <div class="amount-wrap"><span>₹</span><input id="entryAmount" data-autofocus class="form-control form-control-lg" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></div>
+              <div class="invalid-feedback d-block" id="amountError" hidden>Enter an amount greater than 0.</div>
+            </div>
+          </div>
+          <div class="fcard">
+            <div><label for="entryNote" class="lbl">Details (optional)</label>
+              <textarea id="entryNote" class="form-control" rows="4" maxlength="500" placeholder="Items, quantity, bill no., UPI ref…"></textarea></div>
+            <div><label for="entryDate" class="lbl">Date</label><input id="entryDate" class="form-control" type="date"></div>
+          </div>
+        </div></div>
+        <footer class="fp-foot"><div class="fp-foot-inner">
+          <button type="button" class="btn btn-outline-danger" id="deleteEntryBtn" hidden>Delete</button>
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div></footer>
+      </form>
+    </section>
+
+    <!-- Sale / purchase page -->
+    <section class="fpage" id="billModal" hidden>
+      <form class="fp-form" id="billForm" novalidate>
+        <header class="appbar fp-bar">
+          <button type="button" class="icon-btn" data-close aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <h1 id="billTitle">New sale</h1>
+        </header>
+        <div class="fp-body"><div class="fp-inner">
+          <div class="fcard">
+            <div class="btn-group seg w-100" role="group">
+              <input type="radio" class="btn-check" name="billKind" id="kindSale" value="sale">
+              <label class="btn btn-outline-secondary seg-got" for="kindSale">Sale</label>
+              <input type="radio" class="btn-check" name="billKind" id="kindPurchase" value="purchase">
+              <label class="btn btn-outline-secondary seg-gave" for="kindPurchase">Purchase</label>
+            </div>
+            <div><label for="billParty" class="lbl" id="billPartyLbl">Customer</label>
+              <select id="billParty" class="form-select"></select>
+              <div class="invalid-feedback">Choose a party.</div></div>
+            <div class="row g-2">
+              <div class="col-6"><label for="billNo" class="lbl">Bill no.</label><input id="billNo" class="form-control" type="text" maxlength="20"></div>
+              <div class="col-6"><label for="billDate" class="lbl">Date</label><input id="billDate" class="form-control" type="date"></div>
+            </div>
+          </div>
+          <div class="fcard">
+            <span class="fcard-title">Items</span>
+            <div class="d-flex flex-column gap-2" id="billItems"></div>
+            <button type="button" class="btn btn-outline-primary" id="addItemBtn">+ Add item</button>
+            <div class="invalid-feedback d-block" id="itemsError" hidden>Add at least one item with quantity and rate.</div>
+            <div class="totals" id="billTotals"></div>
+          </div>
+          <div class="fcard">
+            <div>
+              <label for="billPaid" class="lbl" id="billPaidLbl">Received now (optional)</label>
+              <div class="input-group">
+                <span class="input-group-text">₹</span>
+                <input id="billPaid" class="form-control" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0">
+                <button type="button" class="btn btn-outline-secondary" id="billPaidFull">Full amount</button>
+              </div>
+              <div class="invalid-feedback d-block" id="paidError" hidden>This can't be more than the bill total.</div>
+            </div>
+            <div><label for="billNote" class="lbl">Notes (optional)</label>
+              <textarea id="billNote" class="form-control" rows="3" maxlength="500" placeholder="Vehicle no., delivery details…"></textarea></div>
+          </div>
+        </div></div>
+        <footer class="fp-foot"><div class="fp-foot-inner">
+          <button type="button" class="btn btn-outline-danger" id="deleteBillBtn" hidden>Delete</button>
+          <button type="submit" class="btn btn-primary">Save bill</button>
+        </div></footer>
+      </form>
+    </section>
+
+    <!-- Transfer page -->
+    <section class="fpage" id="transferModal" hidden>
+      <form class="fp-form" id="transferForm" novalidate>
+        <header class="appbar fp-bar">
+          <button type="button" class="icon-btn" data-close aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <h1 id="tfTitle">Party to party transfer</h1>
+        </header>
+        <div class="fp-body"><div class="fp-inner">
+          <p class="small text-body-secondary mb-0">Use this when one party pays another for you, or when you move a balance from one khata to another. Both khatas get an entry.</p>
+          <div class="fcard">
+            <div><label for="tfFrom" class="lbl">From (pays / balance moves out)</label><select id="tfFrom" class="form-select"></select></div>
+            <div><label for="tfTo" class="lbl">To (receives / balance moves in)</label><select id="tfTo" class="form-select"></select>
+              <div class="invalid-feedback">Choose two different parties.</div></div>
+            <div><label for="tfAmount" class="lbl">Amount</label>
+              <div class="amount-wrap"><span>₹</span><input id="tfAmount" class="form-control form-control-lg" type="number" inputmode="decimal" min="0" step="0.01" placeholder="0"></div>
+              <div class="invalid-feedback d-block" id="tfAmountError" hidden>Enter an amount greater than 0.</div></div>
+          </div>
+          <div class="fcard">
+            <div><label for="tfDate" class="lbl">Date</label><input id="tfDate" class="form-control" type="date"></div>
+            <div><label for="tfNote" class="lbl">Details (optional)</label><textarea id="tfNote" class="form-control" rows="3" maxlength="500" placeholder="e.g. Paid directly by UPI"></textarea></div>
+          </div>
+          <div class="fcard"><span class="fcard-title">What gets recorded</span><div class="preview" id="tfPreview"></div></div>
+        </div></div>
+        <footer class="fp-foot"><div class="fp-foot-inner">
+          <button type="button" class="btn btn-outline-danger" id="deleteTfBtn" hidden>Delete</button>
+          <button type="submit" class="btn btn-primary">Save transfer</button>
+        </div></footer>
+      </form>
+    </section>
+
+    <!-- Statement page -->
+    <section class="fpage" id="stmtModal" hidden>
+      <div class="fp-form">
+        <header class="appbar fp-bar">
+          <button type="button" class="icon-btn" data-close aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <h1 id="stmtTitle">Statement</h1>
+        </header>
+        <div class="fp-body"><div class="fp-inner">
+          <div class="fcard">
+            <div><label for="stmtPeriod" class="lbl">Period</label>
+              <select id="stmtPeriod" class="form-select">
+                <option value="month">This month</option>
+                <option value="last">Last month</option>
+                <option value="fy">This financial year (Apr–Mar)</option>
+                <option value="all" selected>All time</option>
+                <option value="custom">Custom dates</option>
+              </select></div>
+            <div class="row g-2" id="stmtCustom" hidden>
+              <div class="col-6"><label for="stmtFrom" class="lbl">From</label><input id="stmtFrom" type="date" class="form-control"></div>
+              <div class="col-6"><label for="stmtTo" class="lbl">To</label><input id="stmtTo" type="date" class="form-control"></div>
+            </div>
+          </div>
+          <div class="fcard"><span class="fcard-title">Summary</span><div class="stmt-sum" id="stmtSum"></div></div>
+        </div></div>
+        <footer class="fp-foot"><div class="fp-foot-inner fp-two">
+          <button type="button" class="btn btn-outline-success" id="xlsBtn">Excel (.xlsx)</button>
+          <button type="button" class="btn btn-danger" id="pdfBtn">PDF</button>
+        </div></footer>
+      </div>
+    </section>
+
+    <!-- Party page -->
+    <section class="fpage" id="partyModal" hidden>
+      <form class="fp-form" id="partyForm" novalidate>
+        <header class="appbar fp-bar">
+          <button type="button" class="icon-btn" data-close aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <h1 id="partyTitle">Add party</h1>
+        </header>
+        <div class="fp-body"><div class="fp-inner">
+          <div class="fcard">
+            <div class="btn-group seg w-100" role="group" id="partyTypeSeg">
+              <input type="radio" class="btn-check" name="partyType" id="ptCustomer" value="customer">
+              <label class="btn btn-outline-primary" for="ptCustomer">Customer</label>
+              <input type="radio" class="btn-check" name="partyType" id="ptSupplier" value="supplier">
+              <label class="btn btn-outline-primary" for="ptSupplier">Supplier</label>
+            </div>
+            <div><label for="partyName" class="lbl">Name</label>
+              <input id="partyName" data-autofocus class="form-control form-control-lg" type="text" maxlength="60" autocomplete="off">
+              <div class="invalid-feedback">Enter a name.</div></div>
+            <div><label for="partyPhone" class="lbl">Mobile number (optional)</label>
+              <input id="partyPhone" class="form-control" type="tel" inputmode="tel" maxlength="15" autocomplete="off"></div>
+            <div><label for="partyGstin" class="lbl">GSTIN (optional)</label>
+              <input id="partyGstin" class="form-control text-uppercase" type="text" maxlength="15" autocomplete="off" placeholder="32ABCDE1234F1Z5"></div>
+          </div>
+        </div></div>
+        <footer class="fp-foot"><div class="fp-foot-inner">
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div></footer>
+      </form>
+    </section>
+
+    <!-- Settings page -->
+    <section class="fpage" id="settingsModal" hidden>
+      <form class="fp-form" id="settingsForm" novalidate>
+        <header class="appbar fp-bar">
+          <button type="button" class="icon-btn" data-close aria-label="Back"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+          <h1>Settings</h1>
+        </header>
+        <div class="fp-body"><div class="fp-inner">
+          <div class="fcard">
+            <span class="fcard-title">Business</span>
+            <div><label for="setName" class="lbl">Business name</label><input id="setName" class="form-control" maxlength="60"></div>
+            <div><label for="setPlace" class="lbl">Address / place</label><input id="setPlace" class="form-control" maxlength="80"></div>
+            <div><label for="setGstin" class="lbl">Your GSTIN</label><input id="setGstin" class="form-control text-uppercase" maxlength="15"></div>
+          </div>
+          <div class="fcard">
+            <span class="fcard-title">GST rates shown in bills</span>
+            <div class="d-flex flex-wrap gap-2" id="rateChips"></div>
+            <div class="input-group" style="max-width:240px">
+              <input id="newRate" class="form-control" type="number" min="0" max="100" step="0.01" placeholder="e.g. 12">
+              <span class="input-group-text">%</span>
+              <button type="button" class="btn btn-outline-primary" id="addRateBtn">Add</button>
+            </div>
+            <div class="form-text mt-0">GST 2.0 slabs are 0, 5, 18 and 40%, with 3% for gold and silver. Add 12% or 28% only if your items still use them.</div>
+          </div>
+          <button type="button" class="btn btn-link text-danger px-0 align-self-start" id="resetBtn">Reset demo data</button>
+        </div></div>
+        <footer class="fp-foot"><div class="fp-foot-inner">
+          <button type="submit" class="btn btn-primary">Save</button>
+        </div></footer>
+      </form>
+    </section>
+  </main>
+
+  <!-- Phone bottom navigation -->
+  <nav class="bottomnav" aria-label="Main">
+    <button class="bn-btn" data-go="home"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v10h14V10"/></svg>Home</button>
+    <button class="bn-btn" data-go="khata"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h12a3 3 0 0 1 3 3v13H7a3 3 0 0 1-3-3z"/><path d="M4 17a3 3 0 0 1 3-3h12M8 8h7"/></svg>Khata</button>
+    <button class="bn-btn" data-go="bills"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>Bills</button>
+  </nav>
+</div>
+
+<!-- Confirm modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content">
+      <div class="modal-body">
+        <h5 class="fs-6 fw-semibold mb-2" id="confirmTitle">Delete?</h5>
+        <p class="small text-body-secondary mb-0" id="confirmText"></p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-danger" id="confirmBtn">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast-msg" id="toast" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script>
+(function(){
+  /* ================= theme sync for Bootstrap components ================= */
+  const root = document.documentElement;
+  const mq = window.matchMedia('(prefers-color-scheme: dark)');
+  function syncTheme(){ const t = root.getAttribute('data-theme'); root.setAttribute('data-bs-theme', (t ? t === 'dark' : mq.matches) ? 'dark' : 'light'); }
+  syncTheme();
+  mq.addEventListener && mq.addEventListener('change', syncTheme);
+  new MutationObserver(syncTheme).observe(root, {attributes:true, attributeFilter:['data-theme']});
+
+  /* ================= helpers ================= */
+  const KEY = 'khata-demo-v2';
+  const $ = s => document.querySelector(s);
+  const $$ = s => document.querySelectorAll(s);
+  const inr = new Intl.NumberFormat('en-IN', {maximumFractionDigits:2});
+  const inr2 = new Intl.NumberFormat('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+  const money = n => '₹' + inr.format(Math.abs(n));
+  const r2 = n => Math.round((n + Number.EPSILON) * 100) / 100;
+  const uid = () => Math.random().toString(36).slice(2, 10);
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const initial = name => (String(name).trim()[0] || '?').toUpperCase();
+  const initials = name => String(name).trim().split(/\s+/).slice(0,2).map(w => w[0] || '').join('').toUpperCase() || '?';
+  const pad = n => String(n).padStart(2, '0');
+  const ymd = d => d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate());
+  const dmy = d => pad(d.getDate()) + '-' + pad(d.getMonth()+1) + '-' + d.getFullYear();
+  const fmtDay = d => d.toLocaleDateString('en-IN', {day:'numeric', month:'short', year:'numeric'});
+  const addMin = (iso, m) => new Date(new Date(iso).getTime() + m*60000).toISOString();
+  // keep the time of `baseIso` (or now) but use the picked yyyy-mm-dd
+  function withDate(str, baseIso){
+    const base = baseIso ? new Date(baseIso) : new Date();
+    const [y, m, d] = (str || ymd(new Date())).split('-').map(Number);
+    return new Date(y, m-1, d, base.getHours(), base.getMinutes()).toISOString();
+  }
+  function at(days, h, m){ const t = new Date(); t.setDate(t.getDate()-days); t.setHours(h, m, 0, 0); return t.toISOString(); }
+
+  /* ================= sample data ================= */
+  function seed(){
+    const s = {v:2, biz:{name:'Sreekrishna Stores', place:'Edappally, Kochi', gstin:'32ABCPK1234F1Z5'},
+      gstRates:[0,3,5,18,40], tab:'customer', billTab:'all', seq:{sale:0, purchase:0},
+      parties:[], entries:[], bills:[], transfers:[]};
+    const P = (type, name, phone, gstin, days) => { const p = {id:uid(), type, name, phone, gstin, created:at(days,9,0)}; s.parties.push(p); return p.id; };
+    const E = (pid, kind, amount, note, days, h=11, m=15) => s.entries.push({id:uid(), partyId:pid, kind, amount, note, date:at(days,h,m)});
+    const B = (kind, pid, days, items, paidNow=0, note='') => {
+      s.seq[kind]++;
+      s.bills.push({id:uid(), no:(kind==='sale'?'S-':'P-') + String(s.seq[kind]).padStart(4,'0'), kind, partyId:pid, date:at(days,12,0),
+        items:items.map(([name,qty,rate,gst]) => ({name,qty,rate,gst})), paidNow, note});
+    };
+    const T = (from, to, amount, note, days) => s.transfers.push({id:uid(), from, to, amount, note, date:at(days,16,30)});
+
+    const ramesh = P('customer','Ramesh Kumar','98470 12345','',60);
+    const anjali = P('customer','Anjali Bakery','94460 55821','32AAKFA2211M1Z9',40);
+    const suresh = P('customer','Suresh Menon','','',50);
+    const fathima = P('customer','Fathima Hotel','90370 44102','32BBTPF7781Q1Z2',60);
+    const joseph = P('customer','Joseph Varghese','81290 66734','',3);
+    const rice = P('supplier','Kerala Rice Mills','0484 2401122','32AACCK5521L1ZP',90);
+    const milma = P('supplier','Milma Distributor','94950 30011','32AAAJM0101A1Z4',90);
+    const sreeja = P('supplier','Sreeja Packaging','98950 77240','32CXZPS4410K1Z8',45);
+
+    B('sale', ramesh, 35, [['Festival grocery kit',1,1800,5]], 1890);
+    B('purchase', rice, 40, [['Raw rice 25 kg',20,900,5]], 18900);
+    E(ramesh,'gave',2500,'Rice 25 kg, coconut oil 2 L',22,10,5);
+    E(suresh,'gave',4200,'Monthly provisions',20); E(suresh,'got',4200,'Paid in full',15);
+    B('purchase', rice, 14, [['Matta rice 25 kg',40,1040,5]], 10000);
+    E(sreeja,'gave',2000,'Advance',11);
+    B('purchase', milma, 9, [['Milk & curd – week 40',1,6400,0]], 6400);
+    B('sale', fathima, 8, [['Matta rice 25 kg',6,1180,5],['Sunflower oil 15 L tin',2,1950,5],['Detergent 5 kg',2,620,18]], 3000);
+    E(ramesh,'gave',640,'Sugar, tea powder',6,18,40);
+    B('purchase', sreeja, 4, [['Carry bags (bundle)',5,300,18]], 0);
+    E(anjali,'got',1500,'Advance by GPay',3,16,10);
+    T(fathima, rice, 5000, 'Fathima Hotel paid Kerala Rice Mills directly by UPI', 3);
+    E(ramesh,'got',1000,'Cash',2,9,20);
+    B('sale', anjali, 1, [['Maida 50 kg bag',2,1650,5],['Sugar 50 kg bag',1,2300,5]], 0);
+    B('sale', fathima, 1, [['Toor dal 10 kg',2,1420,5],['Soft drinks crate',1,720,40]], 0, 'Delivered by van');
+    E(joseph,'gave',260,'Milk & bread',0,8,15);
+    return s;
+  }
+  function load(){ try{ const s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; }catch(e){ return null; } }
+  function save(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){} }
+
+  let state = load() || seed();
+  let page = 'home', openId = null, query = '', pendingConfirm = null;
+  let monthOffset = 0;          // bills page: 0 = this month
+  let editing = null;           // entry modal
+  let billDraft = null;         // bill modal
+  let tfEditId = null;          // transfer modal
+  let partyMode = 'add';
+
+  /* ================= derived ledger ================= */
+  const partyById = id => state.parties.find(p => p.id === id);
+  const pname = id => (partyById(id) || {name:'Deleted party'}).name;
+  const labels = type => type === 'supplier'
+    ? {gave:'PAYMENT', got:'PURCHASE', gaveS:'Payment', gotS:'Purchase', noun:'supplier', bill:'purchase'}
+    : {gave:'YOU GAVE', got:'YOU GOT', gaveS:'You gave', gotS:'You got', noun:'customer', bill:'sale'};
+
+  function billCalc(b){
+    let taxable = 0, gst = 0; const by = {};
+    b.items.forEach(it => {
+      const t = r2((+it.qty||0) * (+it.rate||0)), g = r2(t * (+it.gst||0) / 100);
+      taxable += t; gst += g;
+      by[it.gst] = by[it.gst] || {t:0, g:0}; by[it.gst].t = r2(by[it.gst].t + t); by[it.gst].g = r2(by[it.gst].g + g);
+    });
+    taxable = r2(taxable); gst = r2(gst);
+    return {taxable, gst, total:r2(taxable + gst), by};
+  }
+  const itemsSummary = b => b.items.map(i => i.name).filter(Boolean).join(', ');
+
+  // Every ledger line: manual entries + bill effects + transfer effects.
+  // kind 'gave' raises what the party owes you; 'got' lowers it.
+  function ledgerRows(){
+    const out = [];
+    state.entries.forEach(e => out.push({key:e.id, src:'entry', refId:e.id, partyId:e.partyId, kind:e.kind, amount:e.amount, date:e.date, tag:'', note:e.note}));
+    state.bills.forEach(b => {
+      const c = billCalc(b), sale = b.kind === 'sale';
+      out.push({key:'b1'+b.id, src:'bill', refId:b.id, partyId:b.partyId, kind:sale?'gave':'got', amount:c.total, date:b.date,
+        tag:(sale?'Sale ':'Purchase ') + b.no + (c.gst ? ' · GST ' + money(c.gst) : ''), note:[itemsSummary(b), b.note].filter(Boolean).join('\n')});
+      if (b.paidNow > 0) out.push({key:'b2'+b.id, src:'bill', refId:b.id, partyId:b.partyId, kind:sale?'got':'gave', amount:b.paidNow, date:addMin(b.date,1),
+        tag:(sale?'Received against ':'Paid against ') + b.no, note:''});
+    });
+    state.transfers.forEach(t => {
+      out.push({key:'t1'+t.id, src:'transfer', refId:t.id, partyId:t.from, kind:'got', amount:t.amount, date:t.date, tag:'Transfer to ' + pname(t.to), note:t.note});
+      out.push({key:'t2'+t.id, src:'transfer', refId:t.id, partyId:t.to, kind:'gave', amount:t.amount, date:t.date, tag:'Transfer from ' + pname(t.from), note:t.note});
+    });
+    return out;
+  }
+  let ROWS = [];
+  const refreshRows = () => { ROWS = ledgerRows(); };
+  const rowsOf = pid => ROWS.filter(r => r.partyId === pid);
+  const signed = r => r.kind === 'gave' ? r.amount : -r.amount;
+  const balOf = pid => r2(rowsOf(pid).reduce((s,r) => s + signed(r), 0));
+  const lastOf = p => rowsOf(p.id).reduce((m,r) => r.date > m ? r.date : m, p.created);
+
+  function rel(iso){
+    const d = new Date(iso), n = new Date();
+    const diff = Math.round((new Date(n.getFullYear(),n.getMonth(),n.getDate()) - new Date(d.getFullYear(),d.getMonth(),d.getDate())) / 864e5);
+    if (diff <= 0) return 'Today';
+    if (diff === 1) return 'Yesterday';
+    if (diff < 30) return diff + ' days ago';
+    return fmtDay(d);
+  }
+  const stamp = iso => { const d = new Date(iso); return d.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'2-digit'}) + ' · ' + d.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit'}); };
+  function balInfo(b){
+    if (b > 0) return {cls:'get', label:"You'll get", long:'You will get'};
+    if (b < 0) return {cls:'give', label:"You'll give", long:'You will give'};
+    return {cls:'zero', label:'Settled', long:'Settled up'};
+  }
+
+  /* ================= small UI utils ================= */
+  let toastTimer;
+  function toast(msg){ const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, 2200); }
+  /* Form pages: shown full screen; the phone/browser back button closes them. */
+  let openPageEl = null, skipPop = false;
+  function showPage(el){
+    if (openPageEl && openPageEl !== el) hidePage(openPageEl, true);
+    const already = openPageEl === el;
+    el.hidden = false; openPageEl = el; document.body.classList.add('form-open');
+    el.querySelector('.fp-body').scrollTop = 0;
+    if (!already){ try{ history.pushState({fpage:el.id}, ''); }catch(e){} }
+    const f = el.querySelector('[data-autofocus]');
+    if (f) setTimeout(() => f.focus(), 50);
+  }
+  function hidePage(el, keepHistory){
+    if (el.hidden) return;
+    el.hidden = true; if (openPageEl === el) openPageEl = null;
+    document.body.classList.toggle('form-open', !!openPageEl);
+    if (!keepHistory){ try{ if (history.state && history.state.fpage === el.id){ skipPop = true; history.back(); } }catch(e){} }
+  }
+  window.addEventListener('popstate', () => {
+    if (skipPop){ skipPop = false; return; }
+    if (openPageEl) hidePage(openPageEl, true);
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && openPageEl && !document.querySelector('.modal.show')) hidePage(openPageEl);
+  });
+  const modal = id => {
+    const el = document.getElementById(id);
+    if (el.classList.contains('fpage')) return {show:() => showPage(el), hide:() => hidePage(el)};
+    return window.bootstrap ? bootstrap.Modal.getOrCreateInstance(el) : null;
+  };
+  function confirmAsk(title, text, btn, fn){
+    $('#confirmTitle').textContent = title; $('#confirmText').textContent = text; $('#confirmBtn').textContent = btn;
+    pendingConfirm = fn; modal('confirmModal')?.show();
+  }
+  function partyOptions(sel, type, selected, includeAll){
+    const groups = includeAll ? ['customer','supplier'] : [type];
+    sel.innerHTML = '<option value="">Choose…</option>' + groups.map(t => {
+      const ps = state.parties.filter(p => p.type === t).sort((a,b) => a.name.localeCompare(b.name));
+      const opts = ps.map(p => `<option value="${p.id}"${p.id === selected ? ' selected' : ''}>${esc(p.name)}</option>`).join('');
+      return includeAll ? `<optgroup label="${t === 'customer' ? 'Customers' : 'Suppliers'}">${opts}</optgroup>` : opts;
+    }).join('');
+  }
+
+  /* ================= layout & navigation ================= */
+  const desk = window.matchMedia('(min-width: 992px)');
+  function layout(){
+    const d = desk.matches;
+    $$('.page').forEach(p => { p.hidden = p.dataset.page !== page; });
+    $$('[data-go]').forEach(b => b.classList.toggle('active', b.dataset.go === page && (b.classList.contains('nav-btn') || b.classList.contains('bn-btn'))));
+    $('#listView').hidden = !d && !!openId;
+    $('#partyView').hidden = !openId;
+    $('#emptyPane').hidden = !d || !!openId;
+    $('#emptyPaneTitle').textContent = 'Select a ' + labels(state.tab).noun;
+    document.body.classList.toggle('ledger-open', !d && page === 'khata' && !!openId);
+  }
+  desk.addEventListener && desk.addEventListener('change', layout);
+  function go(p){
+    page = p;
+    if (p !== 'khata' && !desk.matches) openId = null;
+    layout(); render();
+  }
+  function render(){
+    refreshRows();
+    renderBrand();
+    if (page === 'home') renderDash();
+    if (page === 'khata'){ renderList(); if (openId) renderParty(); }
+    if (page === 'bills') renderBills();
+  }
+
+  function renderBrand(){
+    const b = state.biz;
+    ['#sideIcon','#homeIcon'].forEach(s => $(s).textContent = initials(b.name));
+    $('#sideName').textContent = b.name; $('#homeName').textContent = b.name;
+    $('#sidePlace').textContent = b.place; $('#homePlace').textContent = b.place;
+  }
+
+  /* ================= dashboard ================= */
+  function monthRange(offset){
+    const n = new Date(); const s = new Date(n.getFullYear(), n.getMonth() + offset, 1); const e = new Date(n.getFullYear(), n.getMonth() + offset + 1, 1);
+    return {s, e, label:s.toLocaleDateString('en-IN', {month:'long', year:'numeric'})};
+  }
+  function renderDash(){
+    const h = new Date().getHours();
+    $('#hello').textContent = h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
+    $('#today').textContent = new Date().toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long'});
+
+    let get = 0, give = 0, nGet = 0, nGive = 0;
+    const dues = [];
+    state.parties.forEach(p => { const b = balOf(p.id); if (b > 0){ get += b; nGet++; dues.push([p,b]); } else if (b < 0){ give -= b; nGive++; } });
+    $('#dGet').textContent = money(get); $('#dGive').textContent = money(give);
+    $('#dGetSub').textContent = nGet ? 'from ' + nGet + (nGet === 1 ? ' party' : ' parties') : 'Nothing pending';
+    $('#dGiveSub').textContent = nGive ? 'to ' + nGive + (nGive === 1 ? ' party' : ' parties') : 'Nothing pending';
+
+    const m = monthRange(0);
+    let sales = 0, purch = 0, gOut = 0, gIn = 0;
+    state.bills.forEach(b => { const d = new Date(b.date); if (d < m.s || d >= m.e) return; const c = billCalc(b);
+      if (b.kind === 'sale'){ sales += c.total; gOut += c.gst; } else { purch += c.total; gIn += c.gst; } });
+    $('#monthTitle').textContent = m.label;
+    $('#mSales').textContent = money(sales); $('#mPurch').textContent = money(purch);
+    $('#mGstOut').textContent = money(gOut); $('#mGstIn').textContent = money(gIn);
+    const net = r2(gOut - gIn);
+    $('#gstNetLabel').textContent = net >= 0 ? 'Net GST payable (collected − paid)' : 'GST credit to carry forward';
+    $('#gstNet').textContent = money(net);
+
+    dues.sort((a,b) => b[1] - a[1]);
+    $('#dueList').innerHTML = dues.length ? dues.slice(0,5).map(([p,b]) => `
+      <button class="mini" data-open="${p.id}"><span class="avatar">${esc(initial(p.name))}</span>
+        <span class="flex-grow-1 min-w-0"><span class="pname">${esc(p.name)}</span><span class="pmeta">${p.type === 'supplier' ? 'Supplier' : 'Customer'} · ${rel(lastOf(p))}</span></span>
+        <span class="amt get">${money(b)}</span></button>`).join('')
+      : '<div class="mini-empty">Everyone has paid up.</div>';
+
+    const recent = [...ROWS].sort((a,b) => b.date.localeCompare(a.date))
+      .filter((r, i, arr) => !(r.src === 'transfer' && r.kind === 'gave' && arr.some(x => x.refId === r.refId && x.kind === 'got')))
+      .slice(0, 6);
+    $('#recentList').innerHTML = recent.length ? recent.map(r => {
+      const p = partyById(r.partyId); if (!p) return '';
+      const what = r.tag || (r.kind === 'gave' ? labels(p.type).gaveS : labels(p.type).gotS);
+      return `<button class="mini" data-open="${p.id}"><span class="avatar">${esc(initial(p.name))}</span>
+        <span class="flex-grow-1 min-w-0"><span class="pname">${esc(p.name)}</span><span class="pmeta">${esc(what)} · ${rel(r.date)}</span></span>
+        <span class="amt ${r.kind === 'gave' ? 'get' : 'give'}">${money(r.amount)}</span></button>`;
+    }).join('') : '<div class="mini-empty">No activity yet.</div>';
+  }
+
+  /* ================= khata list ================= */
+  function renderList(){
+    const type = state.tab, L = labels(type);
+    $$('[data-tab]').forEach(t => { const on = t.dataset.tab === type; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
+    const all = state.parties.filter(p => p.type === type);
+    let get = 0, give = 0;
+    all.forEach(p => { const b = balOf(p.id); if (b > 0) get += b; else give -= b; });
+    $('#sumGive').textContent = money(give); $('#sumGet').textContent = money(get);
+    $('#partyCount').textContent = all.length + ' ' + L.noun + (all.length === 1 ? '' : 's');
+    $('#fabLabel').textContent = 'ADD ' + L.noun.toUpperCase();
+    $('#searchInput').placeholder = 'Search ' + L.noun + 's';
+    const q = query.trim().toLowerCase(), qd = q.replace(/\s/g,'');
+    const list = all.filter(p => !q || p.name.toLowerCase().includes(q) || (qd && (p.phone||'').replace(/\s/g,'').includes(qd)))
+      .map(p => ({p, last:lastOf(p), b:balOf(p.id)})).sort((a,b) => b.last.localeCompare(a.last));
+    let html;
+    if (!all.length) html = `<div class="empty"><strong>No ${L.noun}s yet</strong>Tap “Add ${L.noun}” to start a khata.</div>`;
+    else if (!list.length) html = `<div class="empty"><strong>No match</strong>Nothing found for “${esc(query)}”.</div>`;
+    else html = list.map(({p, last, b}) => { const i = balInfo(b);
+      return `<button class="party${p.id === openId ? ' active' : ''}" data-id="${p.id}">
+        <span class="avatar">${esc(initial(p.name))}</span>
+        <span class="flex-grow-1 min-w-0"><span class="pname">${esc(p.name)}</span><span class="pmeta">${rel(last)}</span></span>
+        <span><span class="amt ${i.cls}">${money(b)}</span><span class="amt-label">${i.label}</span></span></button>`; }).join('');
+    $('#partyList').innerHTML = html;
+  }
+
+  /* ================= party ledger ================= */
+  function openParty(id){
+    const p = partyById(id); if (!p) return;
+    if (state.tab !== p.type){ state.tab = p.type; query = ''; $('#searchInput').value = ''; }
+    openId = id; page = 'khata'; layout(); render(); $('#partyScroll').scrollTop = 0;
+  }
+  function closeParty(){ openId = null; layout(); render(); }
+  function renderParty(){
+    const p = partyById(openId); if (!p) return closeParty();
+    const L = labels(p.type), rows = rowsOf(p.id), b = balOf(p.id), i = balInfo(b);
+    $('#pAvatar').textContent = initial(p.name);
+    $('#pName').textContent = p.name;
+    $('#pPhone').textContent = [p.phone, p.gstin && 'GSTIN ' + p.gstin].filter(Boolean).join(' · ') || 'No mobile number';
+    $('#balLabel').textContent = i.long; $('#balAmt').textContent = money(b); $('#balAmt').className = 'bal-amt ' + i.cls;
+    $('#headGave').textContent = L.gave; $('#headGot').textContent = L.got;
+    $('#gaveBtn').textContent = L.gave + ' ₹'; $('#gotBtn').textContent = L.got + ' ₹';
+    $('#billChipLabel').textContent = p.type === 'supplier' ? 'New purchase' : 'New sale';
+    $('#entryCount').textContent = rows.length + (rows.length === 1 ? ' ENTRY' : ' ENTRIES');
+    let run = 0;
+    const list = [...rows].sort((a,c) => a.date.localeCompare(c.date)).map(r => { run = r2(run + signed(r)); return {r, run}; }).reverse();
+    $('#entryList').innerHTML = list.length ? list.map(({r, run}) => `
+      <button class="entry cols" data-src="${r.src}" data-ref="${r.refId}">
+        <span class="e-main">
+          <span class="e-date">${stamp(r.date)}</span>
+          ${r.tag ? `<span class="e-tag">${esc(r.tag)}</span>` : ''}
+          <span class="e-bal ${balInfo(run).cls}">Bal. ${money(run)}</span>
+          ${r.note ? `<span class="e-note">${esc(r.note)}</span>` : ''}
+        </span>
+        <span class="e-gave">${r.kind === 'gave' ? money(r.amount) : ''}</span>
+        <span class="e-got">${r.kind === 'got' ? money(r.amount) : ''}</span>
+      </button>`).join('')
+      : `<div class="empty"><strong>No entries yet</strong>Add what you gave or got using the buttons below.</div>`;
+  }
+
+  /* ================= entry modal ================= */
+  function setEntryType(type){
+    const p = partyById(openId), L = labels(p.type);
+    $('#typeGave').checked = type === 'gave'; $('#typeGot').checked = type === 'got';
+    $('#entryForm').classList.toggle('t-gave', type === 'gave'); $('#entryForm').classList.toggle('t-got', type === 'got');
+    if (!editing.id) $('#entryTitle').textContent = (type === 'gave' ? L.gaveS + ' to ' : L.gotS + ' from ') + p.name;
+  }
+  function openEntry(type, id){
+    const p = partyById(openId), L = labels(p.type);
+    const e = id ? state.entries.find(x => x.id === id) : null;
+    editing = {id: e ? e.id : null};
+    $('#typeGaveLabel').textContent = L.gaveS; $('#typeGotLabel').textContent = L.gotS;
+    $('#entryTitle').textContent = 'Edit entry';
+    setEntryType(e ? e.kind : type);
+    $('#entryAmount').value = e ? e.amount : ''; $('#entryNote').value = e ? e.note : '';
+    $('#entryDate').value = ymd(e ? new Date(e.date) : new Date());
+    $('#entryAmount').classList.remove('is-invalid'); $('#amountError').hidden = true;
+    $('#deleteEntryBtn').hidden = !e;
+    modal('entryModal')?.show();
+  }
+
+  /* ================= bill modal ================= */
+  const defaultRate = () => state.gstRates.includes(5) ? 5 : (state.gstRates[0] ?? 0);
+  const nextNo = kind => (kind === 'sale' ? 'S-' : 'P-') + String(state.seq[kind] + 1).padStart(4, '0');
+  function openBill(kind, partyId, billId){
+    const b = billId ? state.bills.find(x => x.id === billId) : null;
+    billDraft = b ? JSON.parse(JSON.stringify(b)) : {id:null, kind, partyId:partyId || '', no:nextNo(kind), date:new Date().toISOString(),
+      items:[{name:'', qty:1, rate:'', gst:defaultRate()}], paidNow:0, note:''};
+    $('#billTitle').textContent = b ? (b.kind === 'sale' ? 'Sale ' : 'Purchase ') + b.no : 'New ' + kind;
+    $('#billNo').value = billDraft.no; $('#billDate').value = ymd(new Date(billDraft.date));
+    $('#billPaid').value = billDraft.paidNow || ''; $('#billNote').value = billDraft.note || '';
+    $('#deleteBillBtn').hidden = !b;
+    $('#itemsError').hidden = true; $('#paidError').hidden = true; $('#billParty').classList.remove('is-invalid');
+    setBillKind(billDraft.kind, true);
+    renderItems(); updateTotals();
+    modal('billModal')?.show();
+  }
+  function setBillKind(kind, initial){
+    billDraft.kind = kind;
+    $('#kindSale').checked = kind === 'sale'; $('#kindPurchase').checked = kind === 'purchase';
+    const type = kind === 'sale' ? 'customer' : 'supplier';
+    const cur = partyById(billDraft.partyId);
+    if (cur && cur.type !== type) billDraft.partyId = '';
+    partyOptions($('#billParty'), type, billDraft.partyId, false);
+    $('#billPartyLbl').textContent = kind === 'sale' ? 'Customer' : 'Supplier';
+    $('#billPaidLbl').textContent = kind === 'sale' ? 'Received now (optional)' : 'Paid now (optional)';
+    if (!initial && !billDraft.id){ billDraft.no = nextNo(kind); $('#billNo').value = billDraft.no; $('#billTitle').textContent = 'New ' + kind; }
+  }
+  function renderItems(){
+    const rates = [...new Set([...state.gstRates, ...billDraft.items.map(i => +i.gst)])].sort((a,b) => a-b);
+    $('#billItems').innerHTML = billDraft.items.map((it, i) => `
+      <div class="bill-item" data-i="${i}">
+        <div class="d-flex gap-2 align-items-center">
+          <input id="itName${i}" class="form-control form-control-sm it-name" placeholder="Item name" value="${esc(it.name)}" maxlength="80" aria-label="Item name">
+          <button type="button" class="btn btn-sm btn-outline-danger it-del" aria-label="Remove item"${billDraft.items.length === 1 ? ' disabled' : ''}>✕</button>
+        </div>
+        <div class="bi-grid">
+          <div><label class="lbl" for="itQty${i}">Qty</label><input id="itQty${i}" class="form-control form-control-sm it-qty" type="number" inputmode="decimal" min="0" step="any" value="${esc(it.qty)}"></div>
+          <div><label class="lbl" for="itRate${i}">Rate ₹ (before GST)</label><input id="itRate${i}" class="form-control form-control-sm it-rate" type="number" inputmode="decimal" min="0" step="0.01" value="${esc(it.rate)}"></div>
+          <div><label class="lbl" for="itGst${i}">GST</label><select id="itGst${i}" class="form-select form-select-sm it-gst">${rates.map(r => `<option value="${r}"${+it.gst === r ? ' selected' : ''}>${r}%</option>`).join('')}</select></div>
+        </div>
+        <div class="bi-foot"><span class="it-gstamt"></span><strong class="it-total"></strong></div>
+      </div>`).join('');
+  }
+  function updateTotals(){
+    $$('#billItems .bill-item').forEach(el => {
+      const it = billDraft.items[+el.dataset.i]; const t = r2((+it.qty||0) * (+it.rate||0)), g = r2(t * (+it.gst||0) / 100);
+      el.querySelector('.it-gstamt').textContent = 'Taxable ' + money(t) + ' + GST ' + money(g);
+      el.querySelector('.it-total').textContent = money(t + g);
+    });
+    const c = billCalc(billDraft);
+    const rateLines = Object.keys(c.by).map(Number).sort((a,b) => a-b).filter(r => c.by[r].t > 0).map(r =>
+      r === 0 ? `<div><span>GST 0% (exempt)</span><span>₹0</span></div>`
+              : `<div><span>GST ${r}% <span class="text-body-secondary">(CGST ${r/2}% + SGST ${r/2}%)</span></span><span>${money(c.by[r].g)}</span></div>`).join('');
+    $('#billTotals').innerHTML = `<div><span>Taxable value</span><span>${money(c.taxable)}</span></div>${rateLines}
+      <div class="grand"><span>Bill total</span><span>${money(c.total)}</span></div>`;
+    return c;
+  }
+
+  /* ================= transfer modal ================= */
+  function openTransfer(fromId, tfId){
+    const t = tfId ? state.transfers.find(x => x.id === tfId) : null;
+    tfEditId = t ? t.id : null;
+    partyOptions($('#tfFrom'), null, t ? t.from : (fromId || ''), true);
+    partyOptions($('#tfTo'), null, t ? t.to : '', true);
+    $('#tfAmount').value = t ? t.amount : ''; $('#tfNote').value = t ? t.note : '';
+    $('#tfDate').value = ymd(t ? new Date(t.date) : new Date());
+    $('#tfTitle').textContent = t ? 'Edit transfer' : 'Party to party transfer';
+    $('#deleteTfBtn').hidden = !t;
+    $('#tfTo').classList.remove('is-invalid'); $('#tfAmountError').hidden = true;
+    tfPreview();
+    modal('transferModal')?.show();
+  }
+  function tfPreview(){
+    const f = partyById($('#tfFrom').value), t = partyById($('#tfTo').value), a = +$('#tfAmount').value || 0;
+    if (!f || !t || f === t){ $('#tfPreview').innerHTML = '<span class="text-body-secondary">Choose both parties to see what gets recorded.</span>'; return; }
+    const line = (p, kind) => { const L = labels(p.type), nb = r2(balOf(p.id) + (kind === 'gave' ? a : -a)), i = balInfo(nb);
+      return `<div><span><strong>${esc(p.name)}</strong><br><span class="text-body-secondary">${kind === 'gave' ? L.gaveS : L.gotS} ${money(a)}</span></span>
+        <span class="text-end"><span class="text-body-secondary small">New balance</span><br><span class="${i.cls} fw-semibold">${money(nb)} ${i.cls === 'zero' ? '' : i.cls === 'get' ? 'to get' : 'to give'}</span></span></div>`; };
+    // editing: show balances as if this transfer were removed first
+    $('#tfPreview').innerHTML = (tfEditId ? '<span class="small text-body-secondary">Balances below include the current saved transfer.</span>' : '') + line(f, 'got') + line(t, 'gave');
+  }
+
+  /* ================= statement ================= */
+  function stmtRange(){
+    const v = $('#stmtPeriod').value, n = new Date();
+    let s = null, e = null;
+    if (v === 'month'){ s = new Date(n.getFullYear(), n.getMonth(), 1); e = n; }
+    if (v === 'last'){ s = new Date(n.getFullYear(), n.getMonth()-1, 1); e = new Date(n.getFullYear(), n.getMonth(), 0); }
+    if (v === 'fy'){ const y = n.getMonth() >= 3 ? n.getFullYear() : n.getFullYear()-1; s = new Date(y, 3, 1); e = new Date(y+1, 2, 31); }
+    if (v === 'custom'){ const f = $('#stmtFrom').value, t = $('#stmtTo').value;
+      s = f ? new Date(f + 'T00:00:00') : null; e = t ? new Date(t + 'T00:00:00') : null; }
+    if (s) s = new Date(s.getFullYear(), s.getMonth(), s.getDate());
+    const eEnd = e ? new Date(e.getFullYear(), e.getMonth(), e.getDate() + 1) : null;
+    const label = v === 'all' ? 'All transactions up to ' + fmtDay(n) : (s ? fmtDay(s) : 'Start') + ' to ' + (e ? fmtDay(e) : fmtDay(n));
+    return {s, eEnd, label};
+  }
+  function statementData(pid){
+    const {s, eEnd, label} = stmtRange();
+    const all = [...rowsOf(pid)].sort((a,b) => a.date.localeCompare(b.date));
+    let opening = 0, dr = 0, cr = 0; const rows = [];
+    all.forEach(r => { const d = new Date(r.date);
+      if (s && d < s){ opening = r2(opening + signed(r)); return; }
+      if (eEnd && d >= eEnd) return;
+      rows.push(r); if (r.kind === 'gave') dr = r2(dr + r.amount); else cr = r2(cr + r.amount); });
+    let run = opening;
+    const lines = rows.map(r => { run = r2(run + signed(r)); return {r, run}; });
+    return {label, opening, dr, cr, closing:run, lines};
+  }
+  const drcr = n => n > 0 ? 'Dr' : n < 0 ? 'Cr' : '';
+  const particulars = r => [r.tag, r.note].filter(Boolean).join(' – ').replace(/\n/g, ', ') || (r.kind === 'gave' ? 'Given' : 'Received');
+  function renderStmtSum(){
+    const p = partyById(openId); if (!p) return;
+    const d = statementData(p.id), i = balInfo(d.closing);
+    $('#stmtSum').innerHTML = `<span>Period</span><span style="font-weight:500">${esc(d.label)}</span>
+      <span>Opening balance</span><span>${money(d.opening)} ${drcr(d.opening)}</span>
+      <span>Entries</span><span>${d.lines.length}</span>
+      <span>Total ${labels(p.type).gaveS.toLowerCase()} (Dr)</span><span>${money(d.dr)}</span>
+      <span>Total ${labels(p.type).gotS.toLowerCase()} (Cr)</span><span>${money(d.cr)}</span>
+      <span>Closing balance</span><span class="${i.cls}">${money(d.closing)} ${drcr(d.closing)}</span>`;
+  }
+  function openStatement(){
+    const p = partyById(openId);
+    $('#stmtTitle').textContent = 'Statement · ' + p.name;
+    $('#stmtCustom').hidden = $('#stmtPeriod').value !== 'custom';
+    if (!$('#stmtFrom').value){ const n = new Date(); $('#stmtFrom').value = ymd(new Date(n.getFullYear(), n.getMonth(), 1)); $('#stmtTo').value = ymd(n); }
+    renderStmtSum(); modal('stmtModal')?.show();
+  }
+  const safeName = s => s.replace(/[^\w\- ]+/g, '').trim().replace(/\s+/g, '_') || 'party';
+
+  // Downloads: inside a Claude artifact use the platform's save dialog; elsewhere a normal browser download.
+  const dlP = (window.claude && typeof window.claude.use === 'function') ? window.claude.use('downloads').catch(() => null) : Promise.resolve(null);
+  async function saveFile(name, blob){
+    const dl = await dlP;
+    if (dl){
+      try{ const r = await dl.save({filename:name, data:blob}); if (r && r.status === 'saved') toast('Saved ' + name); }
+      catch(e){ if (!e || e.code !== 'declined') toast(e && e.code === 'rate_limited' ? 'A save is already open. Try again in a moment.' : 'Download is not available in this view.'); }
+      return;
+    }
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+    toast('Downloaded ' + name);
+  }
+  function exportXlsx(){
+    if (!window.XLSX) return toast('Excel library did not load. Check your internet connection.');
+    const p = partyById(openId), d = statementData(p.id), b = state.biz;
+    const aoa = [[b.name], [b.place + (b.gstin ? '  ·  GSTIN ' + b.gstin : '')], [],
+      ['Statement of account', p.name], ['Mobile', p.phone || '—'], ['GSTIN', p.gstin || '—'], ['Period', d.label], [],
+      ['Date', 'Particulars', 'Debit (' + labels(p.type).gaveS + ')', 'Credit (' + labels(p.type).gotS + ')', 'Balance', 'Dr/Cr'],
+      ['', 'Opening balance', '', '', Math.abs(d.opening), drcr(d.opening)],
+      ...d.lines.map(({r, run}) => [dmy(new Date(r.date)), particulars(r), r.kind === 'gave' ? r.amount : '', r.kind === 'got' ? r.amount : '', Math.abs(run), drcr(run)]),
+      ['', 'Total', d.dr, d.cr, Math.abs(d.closing), drcr(d.closing)]];
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    ws['!cols'] = [{wch:12},{wch:48},{wch:18},{wch:18},{wch:14},{wch:7}];
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    for (let R = 9; R <= range.e.r; R++) for (let C = 2; C <= 4; C++){ const c = ws[XLSX.utils.encode_cell({r:R, c:C})]; if (c && c.t === 'n') c.z = '#,##0.00'; }
+    const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Statement');
+    const buf = XLSX.write(wb, {bookType:'xlsx', type:'array'});
+    saveFile('Statement_' + safeName(p.name) + '.xlsx', new Blob([buf], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'}));
+  }
+  function exportPdf(){
+    if (!window.jspdf) return toast('PDF library did not load. Check your internet connection.');
+    const {jsPDF} = window.jspdf; const doc = new jsPDF({unit:'pt', format:'a4'});
+    const p = partyById(openId), d = statementData(p.id), b = state.biz;
+    const R = n => 'Rs. ' + inr2.format(Math.abs(n));   // built-in PDF fonts have no ₹ glyph
+    const B = n => R(n) + (drcr(n) ? ' ' + drcr(n) : '');
+    const W = doc.internal.pageSize.getWidth();
+    doc.setFillColor(29, 79, 196); doc.rect(0, 0, W, 6, 'F');
+    doc.setFont('helvetica','bold'); doc.setFontSize(16); doc.text(b.name, 40, 44);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90);
+    doc.text([b.place, b.gstin ? 'GSTIN: ' + b.gstin : ''].filter(Boolean), 40, 60);
+    doc.setTextColor(20); doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.text('Statement of Account', W-40, 44, {align:'right'});
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90); doc.text(d.label, W-40, 60, {align:'right'});
+    doc.setDrawColor(220); doc.line(40, 80, W-40, 80);
+    doc.setTextColor(20); doc.setFontSize(10); doc.setFont('helvetica','bold'); doc.text(p.name, 40, 100);
+    doc.setFont('helvetica','normal'); doc.setFontSize(9); doc.setTextColor(90);
+    doc.text([p.phone ? 'Mobile: ' + p.phone : '', p.gstin ? 'GSTIN: ' + p.gstin : ''].filter(Boolean), 40, 114);
+    doc.setTextColor(20);
+    doc.text(['Opening: ' + B(d.opening), 'Debit: ' + R(d.dr) + '   Credit: ' + R(d.cr)], W-40, 100, {align:'right'});
+    doc.autoTable({
+      startY: 136, margin:{left:40, right:40},
+      head: [['Date', 'Particulars', 'Debit (' + labels(p.type).gaveS + ')', 'Credit (' + labels(p.type).gotS + ')', 'Balance']],
+      body: [['', 'Opening balance', '', '', B(d.opening)], ...d.lines.map(({r, run}) => [dmy(new Date(r.date)), particulars(r), r.kind === 'gave' ? R(r.amount) : '', r.kind === 'got' ? R(r.amount) : '', B(run)])],
+      foot: [['', 'Total', R(d.dr), R(d.cr), B(d.closing)]],
+      styles:{fontSize:8.5, cellPadding:5, valign:'top'},
+      headStyles:{fillColor:[29,79,196], textColor:255},
+      footStyles:{fillColor:[238,241,246], textColor:20, fontStyle:'bold'},
+      columnStyles:{0:{cellWidth:62}, 2:{halign:'right', cellWidth:78}, 3:{halign:'right', cellWidth:78}, 4:{halign:'right', cellWidth:88}},
+      didParseCell: c => { if (c.section !== 'body') return; if (c.column.index === 2 && c.cell.raw) c.cell.styles.textColor = [198,40,40]; if (c.column.index === 3 && c.cell.raw) c.cell.styles.textColor = [11,122,64]; }
+    });
+    const y = doc.lastAutoTable.finalY + 24;
+    const msg = d.closing > 0 ? p.name + ' has to pay ' + R(d.closing) + ' to ' + b.name + '.'
+              : d.closing < 0 ? b.name + ' has to pay ' + R(d.closing) + ' to ' + p.name + '.' : 'The account is settled.';
+    doc.setFont('helvetica','bold'); doc.setFontSize(10); doc.text(msg, 40, y);
+    doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(120);
+    doc.text('Generated on ' + fmtDay(new Date()) + '. Dr = amount receivable from party, Cr = amount payable to party.', 40, y + 16);
+    saveFile('Statement_' + safeName(p.name) + '.pdf', doc.output('blob'));
+  }
+
+  /* ================= bills page ================= */
+  function renderBills(){
+    const tab = state.billTab;
+    $$('[data-btab]').forEach(t => { const on = t.dataset.btab === tab; t.classList.toggle('active', on); t.setAttribute('aria-selected', on); });
+    const m = monthRange(monthOffset);
+    $('#mLabel').textContent = m.label; $('#mNext').disabled = monthOffset >= 0;
+    const list = state.bills.filter(b => (tab === 'all' || b.kind === tab) && new Date(b.date) >= m.s && new Date(b.date) < m.e)
+      .sort((a,b) => b.date.localeCompare(a.date));
+    let tot = 0, gst = 0; list.forEach(b => { const c = billCalc(b); tot += c.total; gst += c.gst; });
+    $('#bsCountL').textContent = tab === 'sale' ? 'Sales' : tab === 'purchase' ? 'Purchases' : 'Bills';
+    $('#bsCount').textContent = list.length; $('#bsTotal').textContent = money(tot); $('#bsGst').textContent = money(gst);
+    $('#billFabLabel').textContent = tab === 'purchase' ? 'NEW PURCHASE' : 'NEW SALE';
+    $('#billList').innerHTML = list.length ? list.map(b => { const c = billCalc(b), due = r2(c.total - (b.paidNow||0));
+      return `<button class="party" data-bill="${b.id}">
+        <span class="avatar">${esc(initial(pname(b.partyId)))}</span>
+        <span class="flex-grow-1 min-w-0"><span class="pname">${esc(pname(b.partyId))}</span>
+          <span class="pmeta"><span class="kind-tag ${b.kind}">${b.kind === 'sale' ? 'SALE' : 'PURCHASE'}</span>${esc(b.no)} · ${fmtDay(new Date(b.date))}</span></span>
+        <span><span class="amt">${money(c.total)}</span><span class="amt-label">${due <= 0 ? 'Paid' : (b.paidNow ? 'Due ' + money(due) : 'On credit')}</span></span>
+      </button>`; }).join('')
+      : `<div class="empty"><strong>No bills in ${esc(m.label)}</strong>Tap “${tab === 'purchase' ? 'New purchase' : 'New sale'}” to add one.</div>`;
+  }
+
+  /* ================= party & settings forms ================= */
+  function openPartyForm(mode, type){
+    partyMode = mode;
+    const p = mode === 'edit' ? partyById(openId) : null;
+    const t = p ? p.type : (type || state.tab);
+    $('#ptCustomer').checked = t === 'customer'; $('#ptSupplier').checked = t === 'supplier';
+    $('#partyTypeSeg').hidden = mode === 'edit';
+    $('#partyTitle').textContent = mode === 'edit' ? 'Edit ' + labels(t).noun : 'Add party';
+    $('#partyName').value = p ? p.name : ''; $('#partyPhone').value = p ? p.phone : ''; $('#partyGstin').value = p ? (p.gstin || '') : '';
+    $('#partyName').classList.remove('is-invalid');
+    modal('partyModal')?.show();
+  }
+  function renderRateChips(){
+    $('#rateChips').innerHTML = state.gstRates.map(r => `<span class="rate-chip">${r}%<button type="button" data-rate="${r}" aria-label="Remove ${r}%">×</button></span>`).join('');
+  }
+  function openSettings(){
+    $('#setName').value = state.biz.name; $('#setPlace').value = state.biz.place; $('#setGstin').value = state.biz.gstin;
+    renderRateChips(); modal('settingsModal')?.show();
+  }
+
+  /* ================= events ================= */
+  document.addEventListener('click', e => {
+    const closeBtn = e.target.closest('[data-close]'); if (closeBtn){ hidePage(closeBtn.closest('.fpage')); return; }
+    const goBtn = e.target.closest('[data-go]'); if (goBtn){ go(goBtn.dataset.go); return; }
+    const tabTile = e.target.closest('[data-go-tab]'); if (tabTile){ state.tab = tabTile.dataset.goTab; save(); openId = desk.matches ? openId : null; go('khata'); return; }
+    if (e.target.closest('[data-settings]')){ openSettings(); return; }
+    const openBtn = e.target.closest('[data-open]'); if (openBtn){ openParty(openBtn.dataset.open); return; }
+    const qa = e.target.closest('[data-qa]');
+    if (qa){ const k = qa.dataset.qa;
+      if (k === 'sale' || k === 'purchase') openBill(k, '');
+      if (k === 'transfer') openTransfer('');
+      if (k === 'party') openPartyForm('add', state.tab);
+    }
+  });
+  $$('[data-tab]').forEach(t => t.addEventListener('click', () => {
+    state.tab = t.dataset.tab; query = ''; $('#searchInput').value = ''; save();
+    openId = null; layout(); render(); $('#listScroll').scrollTop = 0;
+  }));
+  $$('[data-btab]').forEach(t => t.addEventListener('click', () => { state.billTab = t.dataset.btab; save(); renderBills(); }));
+  $('#mPrev').addEventListener('click', () => { monthOffset--; renderBills(); });
+  $('#mNext').addEventListener('click', () => { if (monthOffset < 0){ monthOffset++; renderBills(); } });
+  $('#billList').addEventListener('click', e => { const b = e.target.closest('[data-bill]'); if (b){ const bill = state.bills.find(x => x.id === b.dataset.bill); openBill(bill.kind, bill.partyId, bill.id); } });
+  $('#addBillBtn').addEventListener('click', () => openBill(state.billTab === 'purchase' ? 'purchase' : 'sale', ''));
+  $('#searchInput').addEventListener('input', e => { query = e.target.value; renderList(); });
+  $('#partyList').addEventListener('click', e => { const b = e.target.closest('.party'); if (b) openParty(b.dataset.id); });
+  $('#addPartyBtn').addEventListener('click', () => openPartyForm('add', state.tab));
+  $('#backBtn').addEventListener('click', closeParty);
+  $('#gaveBtn').addEventListener('click', () => openEntry('gave'));
+  $('#gotBtn').addEventListener('click', () => openEntry('got'));
+  $('#billChip').addEventListener('click', () => { const p = partyById(openId); openBill(labels(p.type).bill, p.id); });
+  $('#transferChip').addEventListener('click', () => openTransfer(openId));
+  $('#stmtChip').addEventListener('click', openStatement);
+  $('#entryList').addEventListener('click', e => {
+    const b = e.target.closest('.entry'); if (!b) return;
+    const {src, ref} = b.dataset;
+    if (src === 'entry') openEntry(null, ref);
+    if (src === 'bill'){ const bill = state.bills.find(x => x.id === ref); openBill(bill.kind, bill.partyId, bill.id); }
+    if (src === 'transfer') openTransfer(null, ref);
+  });
+
+  // entry form
+  $('#typeGave').addEventListener('change', () => setEntryType('gave'));
+  $('#typeGot').addEventListener('change', () => setEntryType('got'));
+  $('#entryAmount').addEventListener('input', () => { $('#entryAmount').classList.remove('is-invalid'); $('#amountError').hidden = true; });
+  $('#entryForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const amount = r2(parseFloat($('#entryAmount').value));
+    if (!(amount > 0)){ $('#entryAmount').classList.add('is-invalid'); $('#amountError').hidden = false; $('#entryAmount').focus(); return; }
+    const kind = $('#typeGot').checked ? 'got' : 'gave', note = $('#entryNote').value.trim();
+    const old = editing.id ? state.entries.find(x => x.id === editing.id) : null;
+    const date = withDate($('#entryDate').value, old && old.date);
+    if (old) Object.assign(old, {kind, amount, note, date});
+    else state.entries.push({id:uid(), partyId:openId, kind, amount, note, date});
+    save(); modal('entryModal')?.hide(); render(); toast(old ? 'Entry updated' : 'Entry saved');
+  });
+  $('#deleteEntryBtn').addEventListener('click', () => {
+    state.entries = state.entries.filter(x => x.id !== editing.id);
+    save(); modal('entryModal')?.hide(); render(); toast('Entry deleted');
+  });
+
+  // bill form
+  $('#kindSale').addEventListener('change', () => setBillKind('sale'));
+  $('#kindPurchase').addEventListener('change', () => setBillKind('purchase'));
+  $('#billParty').addEventListener('change', e => { billDraft.partyId = e.target.value; e.target.classList.remove('is-invalid'); });
+  $('#billItems').addEventListener('input', e => {
+    const el = e.target.closest('.bill-item'); if (!el) return; const it = billDraft.items[+el.dataset.i];
+    if (e.target.classList.contains('it-name')) it.name = e.target.value;
+    if (e.target.classList.contains('it-qty')) it.qty = e.target.value;
+    if (e.target.classList.contains('it-rate')) it.rate = e.target.value;
+    if (e.target.classList.contains('it-gst')) it.gst = +e.target.value;
+    $('#itemsError').hidden = true; updateTotals();
+  });
+  $('#billItems').addEventListener('change', e => { if (e.target.classList.contains('it-gst')){ billDraft.items[+e.target.closest('.bill-item').dataset.i].gst = +e.target.value; updateTotals(); } });
+  $('#billItems').addEventListener('click', e => {
+    const del = e.target.closest('.it-del'); if (!del || billDraft.items.length === 1) return;
+    billDraft.items.splice(+del.closest('.bill-item').dataset.i, 1); renderItems(); updateTotals();
+  });
+  $('#addItemBtn').addEventListener('click', () => {
+    const lastGst = billDraft.items.length ? billDraft.items[billDraft.items.length-1].gst : defaultRate();
+    billDraft.items.push({name:'', qty:1, rate:'', gst:lastGst}); renderItems(); updateTotals();
+    $('#itName' + (billDraft.items.length-1)).focus();
+  });
+  $('#billPaidFull').addEventListener('click', () => { $('#billPaid').value = billCalc(billDraft).total || ''; $('#paidError').hidden = true; });
+  $('#billPaid').addEventListener('input', () => { $('#paidError').hidden = true; });
+  $('#billForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const items = billDraft.items.filter(i => (+i.qty > 0) && (+i.rate > 0)).map(i => ({name:(i.name||'').trim() || 'Item', qty:r2(+i.qty), rate:r2(+i.rate), gst:+i.gst}));
+    let ok = true;
+    if (!billDraft.partyId){ $('#billParty').classList.add('is-invalid'); ok = false; }
+    if (!items.length){ $('#itemsError').hidden = false; ok = false; }
+    const total = billCalc({items}).total, paid = r2(+$('#billPaid').value || 0);
+    if (paid > total){ $('#paidError').hidden = false; ok = false; }
+    if (!ok) return;
+    const data = {kind:billDraft.kind, partyId:billDraft.partyId, no:$('#billNo').value.trim() || nextNo(billDraft.kind),
+      date:withDate($('#billDate').value, billDraft.id && billDraft.date), items, paidNow:paid, note:$('#billNote').value.trim()};
+    if (billDraft.id){ Object.assign(state.bills.find(b => b.id === billDraft.id), data); }
+    else { state.bills.push({id:uid(), ...data}); state.seq[data.kind]++; }
+    save(); modal('billModal')?.hide(); render(); toast((data.kind === 'sale' ? 'Sale ' : 'Purchase ') + data.no + (billDraft.id ? ' updated' : ' saved'));
+  });
+  $('#deleteBillBtn').addEventListener('click', () => {
+    state.bills = state.bills.filter(b => b.id !== billDraft.id);
+    save(); modal('billModal')?.hide(); render(); toast('Bill deleted');
+  });
+
+  // transfer form
+  ['#tfFrom','#tfTo','#tfAmount'].forEach(s => $(s).addEventListener('input', () => { $('#tfTo').classList.remove('is-invalid'); $('#tfAmountError').hidden = true; tfPreview(); }));
+  $('#transferForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const from = $('#tfFrom').value, to = $('#tfTo').value, amount = r2(+$('#tfAmount').value || 0);
+    let ok = true;
+    if (!from || !to || from === to){ $('#tfTo').classList.add('is-invalid'); ok = false; }
+    if (!(amount > 0)){ $('#tfAmountError').hidden = false; ok = false; }
+    if (!ok) return;
+    const old = tfEditId ? state.transfers.find(t => t.id === tfEditId) : null;
+    const data = {from, to, amount, note:$('#tfNote').value.trim(), date:withDate($('#tfDate').value, old && old.date)};
+    if (old) Object.assign(old, data); else state.transfers.push({id:uid(), ...data});
+    save(); modal('transferModal')?.hide(); render(); toast('Transfer saved in both khatas');
+  });
+  $('#deleteTfBtn').addEventListener('click', () => {
+    state.transfers = state.transfers.filter(t => t.id !== tfEditId);
+    save(); modal('transferModal')?.hide(); render(); toast('Transfer deleted from both khatas');
+  });
+
+  // statement
+  $('#stmtPeriod').addEventListener('change', () => { $('#stmtCustom').hidden = $('#stmtPeriod').value !== 'custom'; renderStmtSum(); });
+  ['#stmtFrom','#stmtTo'].forEach(s => $(s).addEventListener('change', renderStmtSum));
+  $('#xlsBtn').addEventListener('click', exportXlsx);
+  $('#pdfBtn').addEventListener('click', exportPdf);
+
+  // party form
+  $('#partyName').addEventListener('input', () => $('#partyName').classList.remove('is-invalid'));
+  $('#partyForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    const name = $('#partyName').value.trim(), phone = $('#partyPhone').value.trim(), gstin = $('#partyGstin').value.trim().toUpperCase();
+    if (!name){ $('#partyName').classList.add('is-invalid'); $('#partyName').focus(); return; }
+    modal('partyModal')?.hide();
+    if (partyMode === 'edit'){ Object.assign(partyById(openId), {name, phone, gstin}); save(); render(); toast('Details updated'); }
+    else {
+      const type = $('#ptSupplier').checked ? 'supplier' : 'customer';
+      const p = {id:uid(), type, name, phone, gstin, created:new Date().toISOString()};
+      state.parties.push(p); save(); openParty(p.id); toast((type === 'supplier' ? 'Supplier' : 'Customer') + ' added');
+    }
+  });
+  $('#editPartyBtn').addEventListener('click', () => openPartyForm('edit'));
+  $('#deletePartyBtn').addEventListener('click', () => {
+    const p = partyById(openId); if (!p) return;
+    const nb = state.bills.filter(b => b.partyId === p.id).length, nt = state.transfers.filter(t => t.from === p.id || t.to === p.id).length;
+    confirmAsk('Delete ' + p.name + '?', `This removes the ${labels(p.type).noun}, their entries` + (nb ? `, ${nb} bill${nb>1?'s':''}` : '') + (nt ? ` and ${nt} transfer${nt>1?'s':''} (from the other khata too)` : '') + '. This cannot be undone.', 'Delete', () => {
+      state.parties = state.parties.filter(x => x.id !== p.id);
+      state.entries = state.entries.filter(x => x.partyId !== p.id);
+      state.bills = state.bills.filter(x => x.partyId !== p.id);
+      state.transfers = state.transfers.filter(t => t.from !== p.id && t.to !== p.id);
+      save(); closeParty(); toast('Deleted');
+    });
+  });
+
+  // settings
+  $('#rateChips').addEventListener('click', e => {
+    const b = e.target.closest('[data-rate]'); if (!b) return;
+    if (state.gstRates.length === 1) return toast('Keep at least one GST rate.');
+    state.gstRates = state.gstRates.filter(r => r !== +b.dataset.rate); save(); renderRateChips();
+  });
+  $('#addRateBtn').addEventListener('click', () => {
+    const v = r2(parseFloat($('#newRate').value));
+    if (!(v >= 0 && v <= 100)) return toast('Enter a rate between 0 and 100.');
+    if (!state.gstRates.includes(v)){ state.gstRates.push(v); state.gstRates.sort((a,b) => a-b); save(); }
+    $('#newRate').value = ''; renderRateChips();
+  });
+  $('#newRate').addEventListener('keydown', e => { if (e.key === 'Enter'){ e.preventDefault(); $('#addRateBtn').click(); } });
+  $('#settingsForm').addEventListener('submit', ev => {
+    ev.preventDefault();
+    state.biz = {name:$('#setName').value.trim() || 'My Shop', place:$('#setPlace').value.trim(), gstin:$('#setGstin').value.trim().toUpperCase()};
+    save(); modal('settingsModal')?.hide(); render(); toast('Settings saved');
+  });
+  $('#resetBtn').addEventListener('click', () => {
+    modal('settingsModal')?.hide();
+    confirmAsk('Reset demo data?', 'All parties, bills, transfers and entries will be replaced with the sample data.', 'Reset', () => {
+      state = seed(); save(); openId = null; monthOffset = 0; layout(); render(); toast('Demo data restored');
+    });
+  });
+  $('#confirmBtn').addEventListener('click', () => { const fn = pendingConfirm; pendingConfirm = null; modal('confirmModal')?.hide(); fn && fn(); });
+
+  layout(); render();
+
+  // exposed for automated checks only
+  window.__khata = {billCalc, statementData:(pid) => { refreshRows(); return statementData(pid); }, balOf:(pid) => { refreshRows(); return balOf(pid); }, get state(){ return state; }};
+})();
+</script>
+</body>
+</html>
